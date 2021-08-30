@@ -1,0 +1,7 @@
+# runtime dependencies
+pydantic==1.8.2
+ruamel.yaml==0.17.16
+
+# testing dependencies
+pytest==6.2.5
+pre-commit==2.15.0
