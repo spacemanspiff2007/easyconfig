@@ -2,7 +2,7 @@ from typing import Tuple
 
 from pydantic import Field
 
-from easyconfig import AppConfig, ConfigModel
+from easyconfig import AppConfigModel, ConfigModel
 from easyconfig.yaml import CommentedMap
 from helper import dump_yaml, Path
 
@@ -14,7 +14,7 @@ def test_value_no_comment():
         b: str = 'asdf'
 
     obj = MyCfg()
-    obj._easyconfig.parse_model()
+    obj._easyconfig_initialize().parse_model()
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -28,7 +28,7 @@ def test_value_with_comment():
         b: str = Field('asdf', description='this is a str')
 
     obj = MyCfg()
-    obj._easyconfig.parse_model()
+    obj._easyconfig_initialize().parse_model()
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -38,12 +38,12 @@ def test_value_with_comment():
 
 def test_value_with_comment_alias():
 
-    class MyCfg(AppConfig):
+    class MyCfg(AppConfigModel):
         a: int = Field(7, description='this is an int', alias='AA')
         b: str = Field('asdf', description='this is a str')
 
     obj = MyCfg()
-    obj._easyconfig.parse_model()
+    obj._easyconfig_initialize().parse_model()
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -69,7 +69,7 @@ def test_nested_value_with_comment():
         n: MyEntryC = Field(default_factory=MyEntryC, description='Model desc')
 
     obj = MyCfg()
-    obj._easyconfig.parse_model()
+    obj._easyconfig_initialize().parse_model()
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -94,7 +94,7 @@ def test_nested_tuple_value_with_comment():
             default_factory=lambda: (MyEntryC(), MyEntryC(), MyEntryC()), description='Model desc')
 
     obj = MyCfg()
-    obj._easyconfig.parse_model()
+    obj._easyconfig_initialize().parse_model()
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)

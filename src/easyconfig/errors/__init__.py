@@ -1,3 +1,3 @@
 from .errors import DuplicateSubscriptionError, FunctionCallNotAllowedError, \
-    ReferenceFolderMissingError, SubscriptionAlreadyCanceledError
+    ModelNotProperlyInitialized, ReferenceFolderMissingError, SubscriptionAlreadyCanceledError
 from .handler import set_exception_handler

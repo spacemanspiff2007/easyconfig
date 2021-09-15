@@ -2,11 +2,13 @@ from enum import auto, Enum
 from pathlib import Path
 from typing import Any, Callable, List, Optional, Union
 
+from pydantic.fields import ModelField
+
 import easyconfig
-from easyconfig.config_subscription import Subscription
 from easyconfig.errors import DuplicateSubscriptionError, ReferenceFolderMissingError
 from easyconfig.errors.handler import process_exception
 from easyconfig.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
+from easyconfig.model_subscription import Subscription
 from easyconfig.yaml import CommentedMap
 
 
@@ -27,7 +29,7 @@ class EasyConfigObj:
         self.subs: List[Callable] = []
 
         self.base_path: Optional[Path] = None
-        self.func_transform: Optional[Callable[[Any], Any]] = None
+        self.func_transform: Optional[Callable[[ModelField, Any], Any]] = None
 
         self.first_set = True
 
@@ -62,9 +64,9 @@ class EasyConfigObj:
                 self.model_models.append(ModelModelAccess(name, self.model))
                 continue
 
-            # It's a tuple with models -> we don't replace those
+            # It's a tuple with models -> we don't replace those instead we mutate the values
             if isinstance(value, tuple) and all(map(lambda x: isinstance(x, easyconfig.ConfigModel), value)):
-                for i, _value in enumerate(value):
+                for i, _value in enumerate(value):  # type: int, easyconfig.ConfigModel
                     self.model_models.append(ModelModelTupleAccess(name, self.model, i))
                 continue
 
@@ -72,7 +74,12 @@ class EasyConfigObj:
 
         # Update parent for sub models
         for m_acc in self.model_models:
-            cfg = m_acc.get_value()._easyconfig
+            dst_model = m_acc.get_value()
+            # since we validated the defaults we have a (validated) copy of the sub model instance.
+            # That's why we  initialize the config only here and not earlier (e.g. in __init__ of the model)
+            cfg = dst_model._easyconfig_initialize()
+
+            # Build a tree so we can get values from the parent
             assert cfg.parent is PARENT_MISSING
             cfg.parent = self
             cfg.parse_model()
@@ -82,11 +89,11 @@ class EasyConfigObj:
         assert isinstance(model, self.model.__class__), f'{type(model)} != {type(self.model)}'
 
         changed = False
-        for access in self.model_models:
-            _model = access.get_value()
-            changed = _model._easyconfig.set_values(access.get_value(model)) or changed
-        for access in self.model_values:
-            changed = access.set_from_model(model, self.func_transform) or changed
+        for m_access in self.model_models:
+            modify_model = m_access.get_value()
+            changed = modify_model._easyconfig.set_values(m_access.get_value(model)) or changed
+        for v_access in self.model_values:
+            changed = v_access.set_from_model(model, self.func_transform) or changed
 
         # callback when all values are set
         try:
@@ -100,16 +107,16 @@ class EasyConfigObj:
             self.notify()
         return changed
 
-    def update_map(self, map: CommentedMap):
-        for access in self.model_models:
-            _map = access.update_map(map)
-            access.get_value()._easyconfig.update_map(_map)
-        for access in self.model_values:
-            access.update_map(map)
+    def update_map(self, c_map: CommentedMap):
+        for m_access in self.model_models:
+            _map = m_access.update_map(c_map)
+            m_access.get_value()._easyconfig.update_map(_map)
+        for v_access in self.model_values:
+            v_access.update_map(c_map)
 
     def get_base_path(self) -> Path:
         if self.base_path is not None:
             return self.base_path
-        if self.parent is PARENT_ROOT or self.parent is PARENT_MISSING:
-            raise ReferenceFolderMissingError()
+        if not isinstance(self.parent, EasyConfigObj):
+            raise ReferenceFolderMissingError(f'Parent is {self.parent}')
         return self.parent.get_base_path()

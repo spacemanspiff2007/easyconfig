@@ -1,14 +1,13 @@
 from pathlib import Path
 from typing import Union
 
+from pydantic.fields import ModelField
+
+import easyconfig.config_obj
 from easyconfig.models import ConfigModel
 
 
 class PathModel(ConfigModel):
-
-    def __init__(self, **data):
-        super().__init__(**data)
-        self._easyconfig.func_transform = self._transform_path
 
     def set_file_path(self, path: Union[Path, str]):
         """Set the file path for this PathModel and all sub PathModels.
@@ -21,9 +20,17 @@ class PathModel(ConfigModel):
             path = Path(path)
         self._easyconfig.base_path = path.resolve()
 
-    def _transform_path(self, new_value):
-        if not isinstance(new_value, Path):
+    def _easyconfig_initialize(self) -> 'easyconfig.config_obj.EasyConfigObj':
+        super()._easyconfig_initialize()
+        self._easyconfig.func_transform = self._transform_path
+        return self._easyconfig
+
+    def _transform_path(self, field: ModelField, new_value):
+        if not issubclass(field.type_, Path):
             return new_value
+
+        if isinstance(new_value, str):
+            new_value = Path(new_value)
 
         if new_value.is_absolute():
             return new_value

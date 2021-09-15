@@ -70,3 +70,20 @@ def test_nested_models():
 
     assert 'a' in obj.__fields__
     assert 'b' in obj.__fields__
+
+
+def test_env_access():
+
+    class ChildModel(BaseModel):
+        c_a: str = Field(3, description='desc c_a', env='my_env_var')
+        c_b: int = Field(3, description='desc c_b')
+
+    class ParentModel(BaseModel):
+        a: str = Field(3, description='desc a')
+        b: ChildModel = Field(default_factory=ChildModel, description='desc a')
+
+    obj = ParentModel()
+    assert obj.b.c_b == 3
+
+    assert 'a' in obj.__fields__
+    assert 'b' in obj.__fields__

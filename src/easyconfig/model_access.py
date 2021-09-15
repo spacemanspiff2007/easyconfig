@@ -1,4 +1,7 @@
+from json import loads
 from typing import Any, Callable, Optional
+
+from pydantic.fields import ModelField
 
 import easyconfig
 from easyconfig.__const__ import MISSING
@@ -9,32 +12,52 @@ class ModelValueAccess:
     def __init__(self, name: str, model: 'easyconfig.ConfigModel'):
         self.name: str = name
         self.model: easyconfig.ConfigModel = model
+        self.field: ModelField = model.__fields__[name]
+
+        self._val_set = False
 
     def get_value(self, model=MISSING) -> Any:
         return getattr(self.model, self.name) if model is MISSING else getattr(model, self.name)
 
-    def set_from_model(self, model: 'easyconfig.ConfigModel', transform: Optional[Callable[[Any], Any]] = None) -> bool:
+    def set_from_model(self, model: 'easyconfig.ConfigModel',
+                       transform: Optional[Callable[['ModelField', Any], Any]] = None) -> bool:
+
+        # don't overwrite with model defaults once we have a value set
+        # But set at least once so we transform the value
+        if self._val_set:
+            if self.name not in model.__fields_set__:
+                return False
+        self._val_set = True
+
         value = self.get_value()
         new = getattr(model, self.name)
         if transform is not None:
-            new = transform(new)
+            new = transform(self.field, new)
         if new == value:
             return False
         setattr(self.model, self.name, new)
         return True
 
     def update_map(self, map: CommentedMap) -> CommentedMap:
-        field_cfg = self.model.__fields__[self.name]
-        key = field_cfg.alias
-
+        key = self.field.alias
         if key in map:
             return None
-        map[key] = self.get_value()
 
-        if field_cfg.field_info.description is not None:
-            if key not in map.ca.items:
-                map.yaml_add_eol_comment(field_cfg.field_info.description, key)
+        # yaml can't serialize all data types natively so we use the json serializer of the model
+        _json_value = self.model.__config__.json_dumps(
+            {'obj': self.field.get_default()}, default=self.model.__json_encoder__)
+        map[key] = loads(_json_value)['obj']
 
+        self.add_comment_to_map(map)
+        return None
+
+    def add_comment_to_map(self, c_map: CommentedMap):
+        if self.field.field_info.description is None:
+            return None
+
+        key = self.field.alias
+        if key not in c_map.ca.items:
+            c_map.yaml_add_eol_comment(self.field.field_info.description, key)
         return None
 
 
@@ -42,20 +65,17 @@ class ModelModelAccess(ModelValueAccess):
     def get_value(self, model=MISSING) -> 'easyconfig.ConfigModel':
         return getattr(self.model, self.name) if model is MISSING else getattr(model, self.name)
 
-    def set_from_model(self, model: 'easyconfig.ConfigModel') -> bool:
+    def set_from_model(self, model: 'easyconfig.ConfigModel',
+                       transform: Optional[Callable[['ModelField', Any], Any]] = None) -> bool:
         raise NotImplementedError()
 
     def update_map(self, map: CommentedMap) -> CommentedMap:
-        field_cfg = self.model.__fields__[self.name]
-        key = field_cfg.alias
-
+        key = self.field.alias
         if key in map:
             return map[key]
         map[key] = new_map = CommentedMap()
 
-        if field_cfg.field_info.description is not None:
-            if key not in map.ca.items:
-                map.yaml_add_eol_comment(field_cfg.field_info.description, key)
+        self.add_comment_to_map(map)
         return new_map
 
 
@@ -68,8 +88,7 @@ class ModelModelTupleAccess(ModelModelAccess):
         return getattr(self.model, self.name)[self.pos] if model is MISSING else getattr(model, self.name)[self.pos]
 
     def update_map(self, map: CommentedMap) -> CommentedMap:
-        field_cfg = self.model.__fields__[self.name]
-        key = field_cfg.alias
+        key = self.field.alias
 
         # yaml doesn't know tuples, these entries are represented as lists
         if key in map:
@@ -81,8 +100,5 @@ class ModelModelTupleAccess(ModelModelAccess):
             _list.append(CommentedMap())
 
         # the comment is on top
-        if field_cfg.field_info.description is not None:
-            if key not in map.ca.items:
-                map.yaml_add_eol_comment(field_cfg.field_info.description, key)
-
+        self.add_comment_to_map(map)
         return _list[self.pos]

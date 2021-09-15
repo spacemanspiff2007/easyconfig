@@ -8,12 +8,13 @@ from easyconfig.models import PathModel
 from easyconfig.yaml import CommentedMap, yaml_rt
 
 
-class AppConfig(PathModel):
+class AppConfigModel(PathModel):
     _ec_path: Optional[Path] = PrivateAttr()
 
     def __init__(self, **data):
         super().__init__(**data)
 
+        self._easyconfig_initialize()
         self._easyconfig.parent = PARENT_ROOT
         self._easyconfig.parse_model()
 
@@ -53,11 +54,12 @@ class AppConfig(PathModel):
         """
         if path is not None:
             self.set_file_path(path)
+        assert isinstance(self._ec_path, Path)
 
         cfg = CommentedMap()
 
         if self._ec_path.is_file():
-            with path.open('r', encoding='utf-8') as file:
+            with self._ec_path.open('r', encoding='utf-8') as file:
                 cfg = yaml_rt.load(file)
             if cfg is None:
                 cfg = CommentedMap()

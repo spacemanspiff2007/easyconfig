@@ -27,14 +27,14 @@ PathModel
    :members: on_all_values_set, subscribe_for_changes, set_file_path
    :member-order: groupwise
 
-AppConfig
+AppConfigModel
 --------------------------------------
 
-.. inheritance-diagram:: easyconfig.AppConfig
+.. inheritance-diagram:: easyconfig.AppConfigModel
    :top-classes: easyconfig.models.config_model.ConfigModel
    :parts: 1
 
-.. autoclass:: easyconfig.AppConfig
+.. autoclass:: easyconfig.AppConfigModel
    :members: on_all_values_set, subscribe_for_changes, set_file_path, load_dict, load_file
    :member-order: groupwise
 
@@ -42,5 +42,5 @@ AppConfig
 Subscription
 ======================================
 
-.. autoclass:: easyconfig.config_subscription.Subscription
+.. autoclass:: easyconfig.model_subscription.Subscription
    :members: cancel

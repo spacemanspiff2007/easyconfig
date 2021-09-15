@@ -2,7 +2,6 @@
 ![Tests Status](https://github.com/spacemanspiff2007/easyconfig/workflows/Tests/badge.svg)
 [![Updates](https://pyup.io/repos/github/spacemanspiff2007/easyconfig/shield.svg)](https://pyup.io/repos/github/spacemanspiff2007/easyconfig/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/easyconfig)
-
 ![PyPI](https://img.shields.io/pypi/v/easyconfig)
 [![Downloads](https://pepy.tech/badge/easyconfig/month)](https://pepy.tech/project/easyconfig)
 
@@ -18,20 +17,24 @@ If you have previously worked with pydantic you should feel right at home
 
 ## Usage
 Instead of using ``BaseModel`` from pydantic there are different Models which have to be used:
+
 ```python
 from easyconfig import ConfigModel  # Use this instead of BaseModel
-from easyconfig import PathModel    # Use this for path configuration
-from easyconfig import AppConfig    # Use this as a topmost Model
+from easyconfig import PathModel  # Use this for path configuration
+from easyconfig import AppConfigModel  # Use this as a topmost Model
 ```
 
 ### Simple example
-```python
-from easyconfig import AppConfig
 
-class MyAppSimpleConfig(AppConfig):
+```python
+from easyconfig import AppConfigModel
+
+
+class MyAppSimpleConfig(AppConfigModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
+
 
 # Create a global variable which then can be used throughout your code
 CONFIG = MyAppSimpleConfig()
@@ -52,18 +55,22 @@ port: 443
 ```
 
 ### Nested example
+
 ```python
 from pydantic import Field
-from easyconfig import AppConfig, ConfigModel
+from easyconfig import AppConfigModel, ConfigModel
+
 
 class HttpConfig(ConfigModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
-class MyAppSimpleConfig(AppConfig):
-    run_at: int = Field(12, alias='run at') # use alias to load from/create a different key
+
+class MyAppSimpleConfig(AppConfigModel):
+    run_at: int = Field(12, alias='run at')  # use alias to load from/create a different key
     http = HttpConfig()
+
 
 CONFIG = MyAppSimpleConfig()
 CONFIG.load_file('/my/configuration/file.yml')
@@ -81,14 +88,17 @@ http:
 ### Comments
 It's possible to specify a description through the pydantic ``Field``.
 The description will be created as a comment in the .yml file
+
 ```python
 from pydantic import Field
-from easyconfig import AppConfig
+from easyconfig import AppConfigModel
 
-class MyAppSimpleConfig(AppConfig):
+
+class MyAppSimpleConfig(AppConfigModel):
     retries: int = Field(5, description='Amount of retries on error')
     url: str = 'localhost'
     port: int = 443
+
 
 CONFIG = MyAppSimpleConfig()
 CONFIG.load_file('/my/configuration/file.yml')
@@ -104,16 +114,20 @@ port: 443
 It's possible to register callbacks that will get executed when a value changes or
 when the configuration gets loaded for the first time. A useful feature if the application allows dynamic reloading
 of the configuration file (e.g. through a file watcher).
-```python
-from easyconfig import AppConfig
 
-class MyAppSimpleConfig(AppConfig):
+```python
+from easyconfig import AppConfigModel
+
+
+class MyAppSimpleConfig(AppConfigModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
+
 def setup_http():
     create_my_http_client(CONFIG.url, CONFIG.port)
+
 
 CONFIG = MyAppSimpleConfig()
 CONFIG.load_file('/my/configuration/file.yml')
@@ -150,44 +164,47 @@ class MyConfigModel(ConfigModel):
 
 PathModel inherits from ConfigModel so everything that works for ConfigModel also works for PathModel
 
-
 ```python
 from pathlib import Path
-from easyconfig import PathModel, AppConfig
+from easyconfig import PathModel, AppConfigModel
+
 
 # Path objects will be automatically resolved to absolute paths
 class PathContainer(PathModel):
     folder = Path('folder_path')
     exec = Path('./rel_path')
 
-class MyAppSimpleConfig(AppConfig):
+
+class MyAppSimpleConfig(AppConfigModel):
     folders = PathContainer()
+
 
 CONFIG = MyAppSimpleConfig()
 CONFIG.load_file('/my/configuration/file.yml')
 
-CONFIG.folders.exec # <-- /my/configuration/rel_path
+CONFIG.folders.exec  # <-- /my/configuration/rel_path
 
 # base path can be set per PathModel and is valid for all sub items
 CONFIG.folders.set_file_path('/other/path')
 CONFIG.load_file()
 
-CONFIG.folders.exec # <-- /other/path/rel_path
+CONFIG.folders.exec  # <-- /other/path/rel_path
 ```
 
 
-### AppConfig
+### AppConfigModel
 
-AppConfig inherits from PathModel so everything that works for PathModel also works for AppConfig
-
+AppConfigModel inherits from PathModel so everything that works for PathModel also works for AppConfigModel
 
 ```python
-from easyconfig import AppConfig
+from easyconfig import AppConfigModel
 
-class MyAppSimpleConfig(AppConfig):
+
+class MyAppSimpleConfig(AppConfigModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
+
 
 CONFIG = MyAppSimpleConfig()
 
@@ -204,5 +221,11 @@ CONFIG.load_dict({'my': 'dict'})
 
 
 # Changelog
+#### 0.0.2 (16.09.2021)
+- Validate user defaults
+- Use json representation of values to get native yaml datatypes
+- Use enum values instead of enum types
+
+
 #### 0.0.1 (14.09.2021)
 - Initial release

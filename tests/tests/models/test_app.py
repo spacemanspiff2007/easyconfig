@@ -1,10 +1,10 @@
-from easyconfig import AppConfig, ConfigModel
+from easyconfig import AppConfigModel, ConfigModel
 from helper import Path
 
 
 def test_load_flat():
 
-    class MyCfg(AppConfig):
+    class MyCfg(AppConfigModel):
         a: int = 7
         b: str = 'asdf'
 
@@ -29,7 +29,7 @@ def test_load_nested():
     class MyEntryB(ConfigModel):
         b: float = 8.888
 
-    class MyCfg(AppConfig):
+    class MyCfg(AppConfigModel):
         key_a: int = 7
         a: MyEntryA = MyEntryA()
         b: MyEntryB = MyEntryB()
@@ -56,14 +56,14 @@ def test_load_nested():
     o.load_file(p)
 
     assert o.key_a == 7
-    assert a.a1 == 8    # <-- observe that the default values from before are restored!
-    assert a.a2 == '1234'
+    assert a.a1 == 9    # <-- observe that the default values from before are not overwritten!
+    assert a.a2 == '5768'
     assert b.b == 5.0
 
 
 def test_create_flat():
 
-    class MyCfg(AppConfig):
+    class MyCfg(AppConfigModel):
         a: int = 7
         b: str = 'asdf'
 

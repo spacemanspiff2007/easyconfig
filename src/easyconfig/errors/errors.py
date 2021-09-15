@@ -12,3 +12,7 @@ class ReferenceFolderMissingError(Exception):
 
 class FunctionCallNotAllowedError(Exception):
     pass
+
+
+class ModelNotProperlyInitialized(Exception):
+    pass
