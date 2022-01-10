@@ -221,9 +221,12 @@ CONFIG.load_dict({'my': 'dict'})
 
 
 # Changelog
+#### 0.1.0 (10.01.2022)
+- Updated requirements
+
 #### 0.0.2 (16.09.2021)
 - Validate user defaults
-- Use json representation of values to get native yaml datatypes
+- Use json representation of values to get native yaml data types
 - Use enum values instead of enum types
 
 

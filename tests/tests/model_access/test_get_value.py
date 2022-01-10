@@ -23,6 +23,11 @@ def test_value():
     assert obj.a == 9
     assert a.get_value() == 9
 
+    # Setting from an object with defaults will not change the set values
+    a.set_from_model(MyCfg())
+    assert obj.a == 9
+    assert a.get_value() == 9
+
 
 def test_model():
 
