@@ -1,18 +1,22 @@
-class SubscriptionAlreadyCanceledError(Exception):
+class EasyConfigError(Exception):
     pass
 
 
-class DuplicateSubscriptionError(Exception):
+class SubscriptionAlreadyCanceledError(EasyConfigError):
     pass
 
 
-class ReferenceFolderMissingError(Exception):
+class DuplicateSubscriptionError(EasyConfigError):
     pass
 
 
-class FunctionCallNotAllowedError(Exception):
+class ReferenceFolderMissingError(EasyConfigError):
     pass
 
 
-class ModelNotProperlyInitialized(Exception):
+class FunctionCallNotAllowedError(EasyConfigError):
+    pass
+
+
+class ModelNotProperlyInitialized(EasyConfigError):
     pass

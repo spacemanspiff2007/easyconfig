@@ -5,6 +5,7 @@ from pydantic.fields import ModelField
 
 import easyconfig
 from easyconfig.__const__ import MISSING
+from easyconfig.errors import ModelNotProperlyInitialized
 from easyconfig.yaml import CommentedMap, CommentedSeq
 
 
@@ -14,6 +15,7 @@ class ModelValueAccess:
         self.model: easyconfig.ConfigModel = model
         self.field: ModelField = model.__fields__[name]
 
+        self.default_value = MISSING
         self._val_set = False
 
     def get_value(self, model=MISSING) -> Any:
@@ -43,9 +45,17 @@ class ModelValueAccess:
         if key in map:
             return None
 
+        default_value = self.default_value
+        if default_value is MISSING:
+            raise ModelNotProperlyInitialized('Default value is missing')
+
+        # don't add None to the yaml file because this will create empty entries
+        if default_value is None:
+            return None
+
         # yaml can't serialize all data types natively so we use the json serializer of the model
         _json_value = self.model.__config__.json_dumps(
-            {'obj': self.field.get_default()}, default=self.model.__json_encoder__)
+            {'obj': default_value}, default=self.model.__json_encoder__)
         map[key] = loads(_json_value)['obj']
 
         self.add_comment_to_map(map)

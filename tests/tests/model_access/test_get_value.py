@@ -3,7 +3,7 @@ from typing import Tuple
 from pydantic import BaseModel
 
 from easyconfig import ConfigModel
-from easyconfig.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
+from easyconfig.config_obj.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
 
 
 def test_value():
@@ -18,16 +18,6 @@ def test_value():
     assert obj.a == 7
     assert a.get_value() == 7
 
-    a.set_from_model(MyCfg(a=9))
-
-    assert obj.a == 9
-    assert a.get_value() == 9
-
-    # Setting from an object with defaults will not change the set values
-    a.set_from_model(MyCfg())
-    assert obj.a == 9
-    assert a.get_value() == 9
-
 
 def test_model():
 
@@ -35,16 +25,35 @@ def test_model():
         b: float = 8.888
 
     class MyCfg(BaseModel):
-        a: int = 7
         b: MyEntryB = MyEntryB()
 
     obj = MyCfg()
     a = ModelModelAccess('b', obj)
 
-    assert obj.b.b == 8.888
-    assert a.get_value().b == 8.888
+    assert obj.b.b == a.get_value().b == 8.888
     obj.b.b = 77.77
-    assert a.get_value().b == 77.77
+    assert obj.b.b == a.get_value().b == 77.77
+
+
+def test_model_with_default_value():
+
+    class MyEntryB(ConfigModel):
+        d: int = 0
+        b: float = 8.888
+
+    class MyCfg(ConfigModel):
+        b: MyEntryB = MyEntryB(d=3)
+
+    obj = MyCfg()
+    a = ModelModelAccess('b', obj)
+
+    assert obj.b.b == a.get_value().b == 8.888
+    obj.b.b = 77.77
+    assert obj.b.b == a.get_value().b == 77.77
+
+    assert obj.b.d == a.get_value().d == 3
+    obj.b.d = 5
+    assert obj.b.d == a.get_value().d == 5
 
 
 def test_model_tuple():

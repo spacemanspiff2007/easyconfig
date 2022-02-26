@@ -1,10 +1,11 @@
-from typing import Optional
+from typing import Any, Callable, Optional
 
 from pydantic import BaseModel, PrivateAttr
 
+import easyconfig
 import easyconfig.config_obj
+from easyconfig.config_obj.model_subscription import Subscription as _Subscription
 from easyconfig.errors import FunctionCallNotAllowedError, ModelNotProperlyInitialized
-from easyconfig.model_subscription import Subscription as _Subscription
 from easyconfig.models.model_config import EasyBaseConfig
 
 
@@ -15,7 +16,7 @@ class ConfigModel(BaseModel):
 
     def __init__(self, **data) -> None:
         super().__init__(**data)
-        self._easyconfig = None
+        self._easyconfig: Optional[easyconfig.config_obj.EasyConfigObj] = None
 
     def on_all_values_set(self):
         """Override this function. It'll be called when all values from the file have been correctly set.
@@ -23,7 +24,7 @@ class ConfigModel(BaseModel):
         """
         return None
 
-    def subscribe_for_changes(self, func) -> _Subscription:
+    def subscribe_for_changes(self, func: Callable[[], Any]) -> _Subscription:
         """When a value in this container changes the passed function will be called.
 
         :param func: function which will be called
@@ -33,7 +34,7 @@ class ConfigModel(BaseModel):
 
     def _easyconfig_get(self) -> easyconfig.config_obj.EasyConfigObj:
         if self._easyconfig is None:
-            raise ModelNotProperlyInitialized()
+            raise ModelNotProperlyInitialized(f'Topmost model is not {easyconfig.models.AppConfigModel.__name__}')
         return self._easyconfig
 
     def _easyconfig_initialize(self) -> easyconfig.config_obj.EasyConfigObj:

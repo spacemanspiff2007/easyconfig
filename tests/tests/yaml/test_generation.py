@@ -14,7 +14,7 @@ def test_value_no_comment():
         b: str = 'asdf'
 
     obj = MyCfg()
-    obj._easyconfig_initialize().parse_model()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -28,7 +28,7 @@ def test_value_with_comment():
         b: str = Field('asdf', description='this is a str')
 
     obj = MyCfg()
-    obj._easyconfig_initialize().parse_model()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -43,7 +43,7 @@ def test_value_with_comment_alias():
         b: str = Field('asdf', description='this is a str')
 
     obj = MyCfg()
-    obj._easyconfig_initialize().parse_model()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -55,6 +55,25 @@ def test_value_with_comment_alias():
     p = Path('cfg.yml', initial_value="AA: 9")
     obj.load_file(p)
     assert obj.a == 9
+
+
+def test_nested_value_with_default():
+
+    class MyEntryC(ConfigModel):
+        c: float = None
+        d: str = 'is_c'
+
+    class MyCfg(AppConfigModel):
+        n: MyEntryC = MyEntryC(c=5.5)
+
+    obj = MyCfg()
+
+    map = CommentedMap()
+    obj._easyconfig.update_map(map)
+
+    assert dump_yaml(map) == 'n:\n' \
+                             '  c: 5.5\n' \
+                             '  d: is_c\n'
 
 
 def test_nested_value_with_comment():
@@ -69,7 +88,7 @@ def test_nested_value_with_comment():
         n: MyEntryC = Field(default_factory=MyEntryC, description='Model desc')
 
     obj = MyCfg()
-    obj._easyconfig_initialize().parse_model()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)
@@ -94,7 +113,7 @@ def test_nested_tuple_value_with_comment():
             default_factory=lambda: (MyEntryC(), MyEntryC(), MyEntryC()), description='Model desc')
 
     obj = MyCfg()
-    obj._easyconfig_initialize().parse_model()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
     obj._easyconfig.update_map(map)

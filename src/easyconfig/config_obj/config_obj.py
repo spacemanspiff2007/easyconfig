@@ -5,10 +5,10 @@ from typing import Any, Callable, List, Optional, Union
 from pydantic.fields import ModelField
 
 import easyconfig
+from easyconfig.config_obj.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
+from easyconfig.config_obj.model_subscription import Subscription
 from easyconfig.errors import DuplicateSubscriptionError, ReferenceFolderMissingError
 from easyconfig.errors.handler import process_exception
-from easyconfig.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
-from easyconfig.model_subscription import Subscription
 from easyconfig.yaml import CommentedMap
 
 
@@ -56,7 +56,7 @@ class EasyConfigObj:
             except Exception as e:
                 process_exception(e)
 
-    def parse_model(self):
+    def parse_model(self, set_default_value=False):
         for name in self.model.__fields__:
             value = getattr(self.model, name)
 
@@ -70,19 +70,22 @@ class EasyConfigObj:
                     self.model_models.append(ModelModelTupleAccess(name, self.model, i))
                 continue
 
-            self.model_values.append(ModelValueAccess(name, self.model))
+            value_access = ModelValueAccess(name, self.model)
+            if set_default_value:
+                value_access.default_value = value
+            self.model_values.append(value_access)
 
         # Update parent for sub models
         for m_acc in self.model_models:
             dst_model = m_acc.get_value()
             # since we validated the defaults we have a (validated) copy of the sub model instance.
-            # That's why we  initialize the config only here and not earlier (e.g. in __init__ of the model)
+            # That's why we initialize the config only here and not earlier (e.g. in __init__ of the model)
             cfg = dst_model._easyconfig_initialize()
 
             # Build a tree so we can get values from the parent
             assert cfg.parent is PARENT_MISSING
             cfg.parent = self
-            cfg.parse_model()
+            cfg.parse_model(set_default_value=set_default_value)
         return None
 
     def set_values(self, model: 'easyconfig.ConfigModel') -> bool:

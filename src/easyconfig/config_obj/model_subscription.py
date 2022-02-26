@@ -1,13 +1,11 @@
-from typing import Callable, TYPE_CHECKING
+from typing import Callable
 
-from .errors import SubscriptionAlreadyCanceledError
-
-if TYPE_CHECKING:
-    from easyconfig.config_obj import EasyConfigObj
+import easyconfig
+from easyconfig.errors import SubscriptionAlreadyCanceledError
 
 
 class Subscription:
-    def __init__(self, _cfg_obj: 'EasyConfigObj', func: Callable):
+    def __init__(self, _cfg_obj: 'easyconfig.config_obj.EasyConfigObj', func: Callable):
         self._cfg_obj = _cfg_obj
         self._func = func
 

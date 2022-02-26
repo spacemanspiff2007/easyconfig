@@ -16,7 +16,8 @@ class AppConfigModel(PathModel):
 
         self._easyconfig_initialize()
         self._easyconfig.parent = PARENT_ROOT
-        self._easyconfig.parse_model()
+        # If data is empty it's the first creation of the object.
+        self._easyconfig.parse_model(set_default_value=True if not data else False)
 
         self._ec_path: Optional[Path] = None
 
@@ -59,17 +60,20 @@ class AppConfigModel(PathModel):
         cfg = CommentedMap()
 
         if self._ec_path.is_file():
+            create_file = False
             with self._ec_path.open('r', encoding='utf-8') as file:
                 cfg = yaml_rt.load(file)
             if cfg is None:
                 cfg = CommentedMap()
+        else:
+            create_file = True
 
         # validiate data and create the obj
         obj = self.__class__(**cfg)
         config_changed = self._easyconfig.set_values(obj)
 
         # write back changed config
-        if config_changed:
+        if config_changed or create_file:
             self._easyconfig.update_map(cfg)
             with self._ec_path.open('w', encoding='utf-8') as file:
                 yaml_rt.dump(cfg, file)
