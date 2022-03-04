@@ -1,6 +1,6 @@
 # runtime dependencies
-pydantic    >= 1.9.0
-ruamel.yaml >= 0.17.0
+pydantic    >= 1.9.0,   < 2.0
+ruamel.yaml >= 0.17,    < 0.18
 
 
 # testing dependencies

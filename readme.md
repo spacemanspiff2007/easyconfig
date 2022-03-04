@@ -18,7 +18,7 @@ If you have previously worked with pydantic you should feel right at home
 ## Why not pydantic settings
 A pydantic settings object is a non mutable object.
 With easyconfig you can create a global configuration and just import it into your modules.
-When your application starts you can read the configuration e.g. from a settings file and the object 
+When your application starts you can read the configuration e.g. from a settings file and the object
 will change the values accordingly.
 
 ## Usage
@@ -228,6 +228,11 @@ CONFIG.load_dict({'my': 'dict'})
 
 
 # Changelog
+#### 0.1.2 (08.03.2022)
+- Comments get nicely intended
+- Fixed an issue with nested data structures
+- Allow to specify a different value for file creation
+
 #### 0.1.1 (26.02.2022)
 - Fixed an issue with dynamic defaults
 - Optional values with default None will not be created in the yaml file

@@ -13,7 +13,7 @@ def test_value():
         b: str = 'asdf'
 
     obj = MyCfg()
-    a = ModelValueAccess('a', obj)
+    a = ModelValueAccess('a', obj, tuple())
 
     assert obj.a == 7
     assert a.get_value() == 7
@@ -28,7 +28,7 @@ def test_model():
         b: MyEntryB = MyEntryB()
 
     obj = MyCfg()
-    a = ModelModelAccess('b', obj)
+    a = ModelModelAccess('b', obj, tuple())
 
     assert obj.b.b == a.get_value().b == 8.888
     obj.b.b = 77.77
@@ -45,7 +45,7 @@ def test_model_with_default_value():
         b: MyEntryB = MyEntryB(d=3)
 
     obj = MyCfg()
-    a = ModelModelAccess('b', obj)
+    a = ModelModelAccess('b', obj, tuple())
 
     assert obj.b.b == a.get_value().b == 8.888
     obj.b.b = 77.77
@@ -69,10 +69,10 @@ def test_model_tuple():
 
     obj = MyCfg()
 
-    a = ModelModelTupleAccess('a', obj, 0)
+    a = ModelModelTupleAccess('a', obj, tuple(), 0)
     assert obj.a[0].b == 8.888
     assert a.get_value().b == 8.888
 
-    a = ModelModelTupleAccess('a', obj, 1)
+    a = ModelModelTupleAccess('a', obj, tuple(), 1)
     assert obj.a[1].c == 'is_c'
     assert a.get_value().c == 'is_c'

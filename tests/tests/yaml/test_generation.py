@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import Optional, Tuple
 
 from pydantic import Field
 
@@ -17,8 +17,22 @@ def test_value_no_comment():
     obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
     assert dump_yaml(map) == 'a: 7\nb: asdf\n'
+
+
+def test_value_no_comment_file_value():
+
+    class MyCfg(ConfigModel):
+        a: int = Field(7, file_value=99)
+        b: str = Field('asdf', file_value='aaaa')
+
+    obj = MyCfg()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
+
+    map = CommentedMap()
+    obj._easyconfig.update_map(map, use_file_defaults=True)
+    assert dump_yaml(map) == 'a: 99\nb: aaaa\n'
 
 
 def test_value_with_comment():
@@ -31,7 +45,7 @@ def test_value_with_comment():
     obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
     assert dump_yaml(map) == 'a: 7  # this is an int\n' \
                              'b: asdf # this is a str\n'
 
@@ -46,7 +60,7 @@ def test_value_with_comment_alias():
     obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
     assert dump_yaml(map) == 'AA: 7  # this is an int\n' \
                              'b: asdf # this is a str\n'
 
@@ -69,11 +83,30 @@ def test_nested_value_with_default():
     obj = MyCfg()
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
 
     assert dump_yaml(map) == 'n:\n' \
                              '  c: 5.5\n' \
                              '  d: is_c\n'
+
+
+def test_nested_value_with_default_file_value():
+
+    class MyEntryC(ConfigModel):
+        c: float = None
+        d: str = 'is_c'
+
+    class MyCfg(AppConfigModel):
+        n: MyEntryC = Field(default=None, file_value=MyEntryC(c=7.7, d='is_d'))
+
+    obj = MyCfg()
+
+    map = CommentedMap()
+    obj._easyconfig.update_map(map, use_file_defaults=True)
+
+    assert dump_yaml(map) == 'n:\n' \
+                             '  c: 7.7\n' \
+                             '  d: is_d\n'
 
 
 def test_nested_value_with_comment():
@@ -91,7 +124,7 @@ def test_nested_value_with_comment():
     obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
 
     assert dump_yaml(map) == 'n:  # Model desc\n' \
                              '  c: 8.888\n' \
@@ -116,7 +149,7 @@ def test_nested_tuple_value_with_comment():
     obj._easyconfig_initialize().parse_model(set_default_value=True)
 
     map = CommentedMap()
-    obj._easyconfig.update_map(map)
+    obj._easyconfig.update_map(map, use_file_defaults=False)
 
     assert dump_yaml(map) == 'n:  # Model desc\n' \
                              '- c: 8.888\n' \
@@ -127,3 +160,25 @@ def test_nested_tuple_value_with_comment():
                              '  d: is_c\n' \
                              'a: 7 # this is an int\n' \
                              'b: asdf # this is a str\n'
+
+
+def test_optional():
+    class MyEntryWithOptionals(ConfigModel):
+        o1: Optional[int] = None
+        o2: Optional[str] = None
+
+    class MySub(ConfigModel):
+        a1: MyEntryWithOptionals = Field(MyEntryWithOptionals(), file_value=MyEntryWithOptionals(o1=3))
+
+    class MyCfg(ConfigModel):
+        a: MySub = Field(MySub())
+
+    obj = MyCfg()
+    obj._easyconfig_initialize().parse_model(set_default_value=True)
+
+    map = CommentedMap()
+    obj._easyconfig.update_map(map, use_file_defaults=True)
+
+    assert dump_yaml(map) == 'a:\n' \
+                             '  a1:\n' \
+                             '    o1: 3\n'

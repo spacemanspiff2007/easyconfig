@@ -1,7 +1,11 @@
-import logging
 from typing import Any, Callable
 
-HANDLER: Callable[[Exception], Any] = lambda x: logging.getLogger('easyconfig').error(x)
+
+def default_exception_handler(e: Exception):
+    raise e
+
+
+HANDLER: Callable[[Exception], Any] = default_exception_handler
 
 
 def set_exception_handler(handler: Callable[[Exception], Any]):

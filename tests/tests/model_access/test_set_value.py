@@ -13,7 +13,7 @@ def test_value():
         b: str = 'asdf'
 
     obj = MyCfg()
-    a = ModelValueAccess('a', obj)
+    a = ModelValueAccess('a', obj, tuple())
 
     assert obj.a == 7
     assert a.get_value() == 7

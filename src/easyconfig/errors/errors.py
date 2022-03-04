@@ -20,3 +20,7 @@ class FunctionCallNotAllowedError(EasyConfigError):
 
 class ModelNotProperlyInitialized(EasyConfigError):
     pass
+
+
+class InvalidFileValue(EasyConfigError):
+    pass

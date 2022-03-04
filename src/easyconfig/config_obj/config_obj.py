@@ -5,6 +5,7 @@ from typing import Any, Callable, List, Optional, Union
 from pydantic.fields import ModelField
 
 import easyconfig
+from easyconfig.__const__ import MISSING
 from easyconfig.config_obj.model_access import ModelModelAccess, ModelModelTupleAccess, ModelValueAccess
 from easyconfig.config_obj.model_subscription import Subscription
 from easyconfig.errors import DuplicateSubscriptionError, ReferenceFolderMissingError
@@ -56,23 +57,29 @@ class EasyConfigObj:
             except Exception as e:
                 process_exception(e)
 
-    def parse_model(self, set_default_value=False):
-        for name in self.model.__fields__:
+    def parse_model(self, set_default_value=False, path=tuple(), file_defaults=MISSING):
+        for name, field in self.model.__fields__.items():   # type: str, ModelField
             value = getattr(self.model, name)
 
             if isinstance(value, easyconfig.ConfigModel):
-                self.model_models.append(ModelModelAccess(name, self.model))
+                model_access = ModelModelAccess(name, self.model, path=path + (name,))
+                if set_default_value:
+                    model_access.set_initial_values(value, field, file_defaults=file_defaults)
+                self.model_models.append(model_access)
                 continue
 
             # It's a tuple with models -> we don't replace those instead we mutate the values
             if isinstance(value, tuple) and all(map(lambda x: isinstance(x, easyconfig.ConfigModel), value)):
                 for i, _value in enumerate(value):  # type: int, easyconfig.ConfigModel
-                    self.model_models.append(ModelModelTupleAccess(name, self.model, i))
+                    model_access = ModelModelTupleAccess(name, self.model, path=path + (name, ), pos=i)
+                    if set_default_value:
+                        model_access.set_initial_values(value, field, file_defaults=file_defaults)
+                    self.model_models.append(model_access)
                 continue
 
-            value_access = ModelValueAccess(name, self.model)
+            value_access = ModelValueAccess(name, self.model, path=path + (name, ))
             if set_default_value:
-                value_access.default_value = value
+                value_access.set_initial_values(value, field, file_defaults=file_defaults)
             self.model_values.append(value_access)
 
         # Update parent for sub models
@@ -85,7 +92,8 @@ class EasyConfigObj:
             # Build a tree so we can get values from the parent
             assert cfg.parent is PARENT_MISSING
             cfg.parent = self
-            cfg.parse_model(set_default_value=set_default_value)
+            cfg.parse_model(
+                set_default_value=set_default_value, path=m_acc.path, file_defaults=m_acc.default_file)
         return None
 
     def set_values(self, model: 'easyconfig.ConfigModel') -> bool:
@@ -110,12 +118,14 @@ class EasyConfigObj:
             self.notify()
         return changed
 
-    def update_map(self, c_map: CommentedMap):
+    def update_map(self, c_map: CommentedMap, use_file_defaults: bool = False):
         for m_access in self.model_models:
-            _map = m_access.update_map(c_map)
-            m_access.get_value()._easyconfig.update_map(_map)
+            new_map = m_access.update_map(c_map, use_file_defaults)
+
+            child_model = m_access.get_value()
+            child_model._easyconfig.update_map(new_map, use_file_defaults)
         for v_access in self.model_values:
-            v_access.update_map(c_map)
+            v_access.update_map(c_map, use_file_defaults)
 
     def get_base_path(self) -> Path:
         if self.base_path is not None:

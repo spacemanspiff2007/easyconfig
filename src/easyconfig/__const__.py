@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Final, Literal
 
 
 class _MissingType(Enum):
@@ -8,5 +9,8 @@ class _MissingType(Enum):
         return '<Missing>'
 
 
-# todo: add type final if we go >= python 3.8
 MISSING = _MissingType.MISSING
+MISSING_TYPE = Literal[_MissingType.MISSING]
+
+
+CREATION_DEFAULT_KEY: Final = 'file_value'

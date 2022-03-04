@@ -1,3 +1,4 @@
+from inspect import isclass
 from pathlib import Path
 from typing import Union
 
@@ -26,7 +27,7 @@ class PathModel(ConfigModel):
         return self._easyconfig
 
     def _transform_path(self, field: ModelField, new_value):
-        if not issubclass(field.type_, Path):
+        if not isclass(field.type_) or not issubclass(field.type_, Path):
             return new_value
 
         if isinstance(new_value, str):

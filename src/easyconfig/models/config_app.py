@@ -5,7 +5,7 @@ from pydantic import PrivateAttr
 
 from easyconfig.config_obj import PARENT_ROOT
 from easyconfig.models import PathModel
-from easyconfig.yaml import CommentedMap, yaml_rt
+from easyconfig.yaml import CommentedMap, write_aligned_yaml, yaml_rt
 
 
 class AppConfigModel(PathModel):
@@ -74,8 +74,9 @@ class AppConfigModel(PathModel):
 
         # write back changed config
         if config_changed or create_file:
-            self._easyconfig.update_map(cfg)
+            self._easyconfig.update_map(cfg, use_file_defaults=create_file)
+
             with self._ec_path.open('w', encoding='utf-8') as file:
-                yaml_rt.dump(cfg, file)
+                write_aligned_yaml(cfg, file)
 
         return config_changed
