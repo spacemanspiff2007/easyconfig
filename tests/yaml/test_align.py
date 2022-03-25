@@ -1,10 +1,12 @@
 import io
 
-from easyconfig.yaml import CommentedMap, write_aligned_yaml
+import pytest
+
+from easyconfig.yaml import CommentedMap, write_aligned_yaml, yaml_rt
 
 
-def test_align():
-
+@pytest.fixture
+def my_map():
     top = CommentedMap()
     top['sub_key1'] = data = CommentedMap()
 
@@ -32,11 +34,16 @@ def test_align():
     sub['b'] = 'an even longer text'
     sub.yaml_add_eol_comment('comment 4', 'a')
     sub.yaml_add_eol_comment('comment 5', 'b')
+    yield top
+
+
+def test_align(my_map: CommentedMap):
 
     buf = io.StringIO()
-    write_aligned_yaml(top, buf)
+    write_aligned_yaml(my_map, buf, 1)
+    file_contents = buf.getvalue()
 
-    assert buf.getvalue() == '''# my description
+    assert file_contents == '''# my description
 sub_key1:
   a: 1       # comment 1
   b: asdf    # comment 2
@@ -48,3 +55,8 @@ sub_key2:
     a: long text            # comment 4
     b: an even longer text  # comment 5
 '''
+
+    top = yaml_rt.load(io.StringIO(initial_value=file_contents))
+    buf = io.StringIO()
+    write_aligned_yaml(top, buf)
+    assert file_contents == buf.getvalue()

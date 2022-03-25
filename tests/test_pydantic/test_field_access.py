@@ -32,6 +32,8 @@ def test_get_model_desc():
     for field in UserModel.__fields__.values():
         assert isinstance(field, ModelField)
 
+    assert UserModel.__fields__['val_f'].field_info.description == 'This key does this'
+
 
 def test_mutate(capsys):
     m = UserModel(val_int=1, val_f=['asdf'])

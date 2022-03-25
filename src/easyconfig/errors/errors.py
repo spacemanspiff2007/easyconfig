@@ -15,12 +15,5 @@ class ReferenceFolderMissingError(EasyConfigError):
 
 
 class FunctionCallNotAllowedError(EasyConfigError):
-    pass
-
-
-class ModelNotProperlyInitialized(EasyConfigError):
-    pass
-
-
-class InvalidFileValue(EasyConfigError):
-    pass
+    def __init__(self):
+        super().__init__('Call "load_config_dict" or "load_config_file" on the app config instance!')

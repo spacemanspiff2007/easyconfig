@@ -8,7 +8,7 @@
 _Easy application configuration with yaml files_
 
 ## Description
-Easyconfig simplifies the configuration management for small application.
+Easyconfig simplifies the configuration management for (small) applications.
 
 Validation and parsing of the configuration file is done through [pydantic](https://pydantic-docs.helpmanual.io/)
 and easyconfig builds on that.
@@ -16,35 +16,37 @@ It's possible to use all pydantic features and model features so every exotic us
 If you have previously worked with pydantic you should feel right at home
 
 ## Why not pydantic settings
-A pydantic settings object is a non mutable object.
+A pydantic settings object is a non-mutable object.
 With easyconfig you can create a global configuration and just import it into your modules.
-When your application starts you can read the configuration e.g. from a settings file and the object
+When your application starts you can read the configuration e.g. from a settings file and the object values
 will change the values accordingly.
 
-## Usage
-Instead of using ``BaseModel`` from pydantic there are different Models which have to be used.
-They just add additional behaviour to make the object mutable.
+Additionally, easyconfig can create a default configuration file with the specified default
+values and comments of the pydantic models.
+That way the users can have some guidance how to change the program behaviour.
 
-```python
-from easyconfig import ConfigModel     # Use this instead of BaseModel
-from easyconfig import PathModel       # Use this for path configuration
-from easyconfig import AppConfigModel  # Use this as a topmost Model
-```
+## Usage
+Create your models as you did before. Then pass an instance of the model to the easyconfig function.
+It will create a mutable object from the model that holds the same values.
+
+Easyconfig also provides some mixin classes, so you can have type hints for the file load functions.
+These mixins are not required, they are just there to provide type hints in the IDE.
 
 ### Simple example
 
 ```python
-from easyconfig import AppConfigModel
+from pydantic import BaseModel
+from easyconfig import AppConfigMixin, create_app_config
 
 
-class MyAppSimpleConfig(AppConfigModel):
+class MySimpleAppConfig(BaseModel, AppConfigMixin):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
 
 # Create a global variable which then can be used throughout your code
-CONFIG = MyAppSimpleConfig()
+CONFIG = create_app_config(MySimpleAppConfig())
 
 # Use with type hints and auto complete
 print(CONFIG.port)
@@ -52,7 +54,7 @@ print(CONFIG.port)
 # Load configuration file from disk.
 # If the file does not exist it will be created
 # Loading will also change all values of CONFIG accordingly
-CONFIG.load_file('/my/configuration/file.yml')
+CONFIG.load_config_file('/my/configuration/file.yml')
 ```
 Created configuration file:
 ```yaml
@@ -64,23 +66,23 @@ port: 443
 ### Nested example
 
 ```python
-from pydantic import Field
-from easyconfig import AppConfigModel, ConfigModel
+from pydantic import BaseModel, Field
+from easyconfig import AppConfigMixin, ConfigMixin, create_app_config
 
 
-class HttpConfig(ConfigModel):
+class HttpConfig(BaseModel, ConfigMixin):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
 
-class MyAppSimpleConfig(AppConfigModel):
+class MyAppSimpleConfig(BaseModel, AppConfigMixin):
     run_at: int = Field(12, alias='run at')  # use alias to load from/create a different key
-    http = HttpConfig()
+    http: HttpConfig = HttpConfig()
 
 
-CONFIG = MyAppSimpleConfig()
-CONFIG.load_file('/my/configuration/file.yml')
+CONFIG = create_app_config(MyAppSimpleConfig())
+CONFIG.load_config_file('/my/configuration/file.yml')
 
 ```
 Created configuration file:
@@ -97,18 +99,18 @@ It's possible to specify a description through the pydantic ``Field``.
 The description will be created as a comment in the .yml file
 
 ```python
-from pydantic import Field
-from easyconfig import AppConfigModel
+from pydantic import BaseModel, Field
+from easyconfig import AppConfigMixin, create_app_config
 
 
-class MyAppSimpleConfig(AppConfigModel):
+class MySimpleAppConfig(BaseModel, AppConfigMixin):
     retries: int = Field(5, description='Amount of retries on error')
     url: str = 'localhost'
     port: int = 443
 
 
-CONFIG = MyAppSimpleConfig()
-CONFIG.load_file('/my/configuration/file.yml')
+CONFIG = create_app_config(MySimpleAppConfig())
+CONFIG.load_config_file('/my/configuration/file.yml')
 ```
 Created configuration file:
 ```yaml
@@ -123,21 +125,23 @@ when the configuration gets loaded for the first time. A useful feature if the a
 of the configuration file (e.g. through a file watcher).
 
 ```python
-from easyconfig import AppConfigModel
+from pydantic import BaseModel
+from easyconfig import AppConfigMixin, create_app_config
 
 
-class MyAppSimpleConfig(AppConfigModel):
+class MySimpleAppConfig(BaseModel, AppConfigMixin):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
 
 def setup_http():
+    # some internal function
     create_my_http_client(CONFIG.url, CONFIG.port)
 
 
-CONFIG = MyAppSimpleConfig()
-CONFIG.load_file('/my/configuration/file.yml')
+CONFIG = create_app_config(MySimpleAppConfig())
+CONFIG.load_config_file('/my/configuration/file.yml')
 
 # setup_http will be automatically called if a value changes in the MyAppSimpleConfig
 # during a subsequent call to CONFIG.load_file() or when the config gets loaded for the first time
@@ -147,87 +151,11 @@ sub = CONFIG.subscribe_for_changes(setup_http)
 sub.cancel()
 ```
 
-### Model documentation
-
-### ConfigModel
-```python
-from easyconfig import ConfigModel
-from pydantic.fields import PrivateAttr
-
-class MyConfigModel(ConfigModel):
-    a = 10
-
-    # Use PrivateAttr to declare variable which are not part of the configuration
-    my_var: int = PrivateAttr()
-
-    # implement this to do something when all values have been set
-    def on_all_values_set(self):
-        print('all values have been set')
-        self.my_var = self.a * self.a
-```
-
-
-### PathModel
-
-PathModel inherits from ConfigModel so everything that works for ConfigModel also works for PathModel
-
-```python
-from pathlib import Path
-from easyconfig import PathModel, AppConfigModel
-
-
-# Path objects will be automatically resolved to absolute paths
-class PathContainer(PathModel):
-    folder = Path('folder_path')
-    exec = Path('./rel_path')
-
-
-class MyAppSimpleConfig(AppConfigModel):
-    folders = PathContainer()
-
-
-CONFIG = MyAppSimpleConfig()
-CONFIG.load_file('/my/configuration/file.yml')
-
-CONFIG.folders.exec  # <-- /my/configuration/rel_path
-
-# base path can be set per PathModel and is valid for all sub items
-CONFIG.folders.set_file_path('/other/path')
-CONFIG.load_file()
-
-CONFIG.folders.exec  # <-- /other/path/rel_path
-```
-
-
-### AppConfigModel
-
-AppConfigModel inherits from PathModel so everything that works for PathModel also works for AppConfigModel
-
-```python
-from easyconfig import AppConfigModel
-
-
-class MyAppSimpleConfig(AppConfigModel):
-    retries: int = 5
-    url: str = 'localhost'
-    port: int = 443
-
-
-CONFIG = MyAppSimpleConfig()
-
-# It's possible to set the file path without loading
-CONFIG.set_file_path('/my/configuration/file.yml')
-
-# Path can be omitted if it was passed once in load_file or set_file_path
-CONFIG.load_file()
-
-# It's also possible to load from a python dictionary
-CONFIG.load_dict({'my': 'dict'})
-```
-
-
-
 # Changelog
+#### 0.2.0 (25.03.2022)
+- Switched to new and more flexible API
+- File default and config default are now separated
+
 #### 0.1.2 (08.03.2022)
 - Comments get nicely intended
 - Fixed an issue with nested data structures

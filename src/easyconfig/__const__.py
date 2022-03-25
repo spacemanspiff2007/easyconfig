@@ -3,14 +3,11 @@ from typing import Final, Literal
 
 
 class _MissingType(Enum):
-    MISSING = object()
+    MISSING_OBJ = object()
 
     def __str__(self):
         return '<Missing>'
 
 
-MISSING = _MissingType.MISSING
-MISSING_TYPE = Literal[_MissingType.MISSING]
-
-
-CREATION_DEFAULT_KEY: Final = 'file_value'
+MISSING: Final = _MissingType.MISSING_OBJ
+MISSING_TYPE: Final = Literal[_MissingType.MISSING_OBJ]
