@@ -1,4 +1,4 @@
 # Packages required to build the documentation
 sphinx
-sphinx-autodoc-typehints
+sphinx-autodoc-typehints==1.17.0
 sphinx_rtd_theme
