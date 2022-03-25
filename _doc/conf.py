@@ -20,7 +20,7 @@ import easyconfig  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 project = 'easyconfig'
-copyright = '2021, spacemanspiff2007'
+copyright = '2022, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The full version, including alpha/beta/rc tags
@@ -34,7 +34,6 @@ release = easyconfig.__version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
-    'sphinx.ext.inheritance_diagram',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,3 +56,8 @@ html_theme = 'sphinx_rtd_theme'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+
+autodoc_default_options = {
+    'inherited-members': True,
+}

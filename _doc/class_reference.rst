@@ -5,42 +5,20 @@ Class reference
 Models
 ======================================
 
-ConfigModel
+ConfigMixin
 --------------------------------------
 
-.. inheritance-diagram:: easyconfig.ConfigModel
-   :top-classes: easyconfig.models.config_model.ConfigModel
-   :parts: 1
+.. autoclass:: easyconfig.ConfigMixin
+   :members:
 
-.. autoclass:: easyconfig.ConfigModel
-   :members: on_all_values_set, subscribe_for_changes
-   :member-order: groupwise
-
-PathModel
+AppConfigMixin
 --------------------------------------
 
-.. inheritance-diagram:: easyconfig.PathModel
-   :top-classes: easyconfig.models.config_model.ConfigModel
-   :parts: 1
-
-.. autoclass:: easyconfig.PathModel
-   :members: on_all_values_set, subscribe_for_changes, set_file_path
-   :member-order: groupwise
-
-AppConfigModel
---------------------------------------
-
-.. inheritance-diagram:: easyconfig.AppConfigModel
-   :top-classes: easyconfig.models.config_model.ConfigModel
-   :parts: 1
-
-.. autoclass:: easyconfig.AppConfigModel
-   :members: on_all_values_set, subscribe_for_changes, set_file_path, load_dict, load_file
-   :member-order: groupwise
-
+.. autoclass:: easyconfig.AppConfigMixin
+   :members:
 
 Subscription
 ======================================
 
-.. autoclass:: easyconfig.model_subscription.Subscription
-   :members: cancel
+.. autoclass:: easyconfig.config_objs.ConfigObjSubscription
+   :members:
