@@ -152,6 +152,9 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.1 (25.03.2022)
+- Allow callbacks for file defaults
+
 #### 0.2.0 (25.03.2022)
 - Switched to new and more flexible API
 - File default and config default are now separated
@@ -172,7 +175,6 @@ sub.cancel()
 - Validate user defaults
 - Use json representation of values to get native yaml data types
 - Use enum values instead of enum types
-
 
 #### 0.0.1 (14.09.2021)
 - Initial release

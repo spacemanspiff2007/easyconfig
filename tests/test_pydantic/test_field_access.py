@@ -26,7 +26,6 @@ class UserModel(MyModel):
 
 
 def test_get_model_desc():
-
     assert list(UserModel.__fields__.keys()) == ['val_int', 'val_f', 'val_str', ]
 
     for field in UserModel.__fields__.values():

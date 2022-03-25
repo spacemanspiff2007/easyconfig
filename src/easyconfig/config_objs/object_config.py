@@ -107,6 +107,10 @@ class ConfigObj:
     def __repr__(self):
         return f'<{self.__class__.__name__} {".".join(self._obj_path)}>'
 
+    def __getattr__(self, item):
+        # delegate call to model
+        return getattr(self._last_model, item)
+
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------

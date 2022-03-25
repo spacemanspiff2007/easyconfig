@@ -42,9 +42,10 @@ setup(
     description="Easy application configuration with yaml files",
     keywords=[
         'yaml',
-        'openhab',
-        'habapp',
-        'home automation'
+        'configuration',
+        'pydantic',
+        'settings',
+        'config'
     ],
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -55,15 +56,16 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages('src', exclude=['tests*']),
     install_requires=load_req(),
+    python_requires='>=3.8',
     classifiers=[
         "Development Status :: 4 - Beta",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: Apache Software License",
         "Natural Language :: English",
         "Operating System :: OS Independent",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3 :: Only",
         "Topic :: Software Development :: Libraries"
     ],

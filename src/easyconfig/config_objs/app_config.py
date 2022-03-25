@@ -1,12 +1,14 @@
+from inspect import isfunction
 from pathlib import Path
-from typing import Any, Dict, Optional, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
 
 from pydantic import BaseModel, Extra
 from typing_extensions import Self
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
-from .object_config import ConfigObj
 from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
+
+from .object_config import ConfigObj
 
 
 class AppConfig(ConfigObj):
@@ -59,12 +61,17 @@ TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
 
 
 def create_app_config(model: TYPE_WRAPPED,
-                      file_values: Union[MISSING_TYPE, None, BaseModel, Dict[str, Any]] = MISSING,
+                      file_values: Union[MISSING_TYPE, None, BaseModel, Dict[str, Any],
+                                         Callable[[], Union[BaseModel, Dict[str, Any]]]] = MISSING,
                       validate_file_values=True) -> TYPE_WRAPPED:
 
     # Implicit default
     if file_values is MISSING:
         file_values = model
+
+    # if it's a callback we get the values
+    if isfunction(file_values):
+        file_values = file_values()
 
     # Validate default
     if file_values is not None:
