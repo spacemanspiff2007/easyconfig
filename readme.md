@@ -32,6 +32,9 @@ It will create a mutable object from the model that holds the same values.
 Easyconfig also provides some mixin classes, so you can have type hints for the file load functions.
 These mixins are not required, they are just there to provide type hints in the IDE.
 
+For convenience reasons you can also import ``AppBaseModel`` and ``BaseModel`` from ``easyconfig`` so you don't have to
+inherit from the mixins yourself.
+
 ### Simple example
 
 ```python
@@ -65,18 +68,20 @@ port: 443
 
 ### Nested example
 
+Nested example with the convenience base classes from easyconfig.
+
 ```python
-from pydantic import BaseModel, Field
-from easyconfig import AppConfigMixin, ConfigMixin, create_app_config
+from pydantic import Field
+from easyconfig import AppBaseModel, BaseModel, create_app_config
 
 
-class HttpConfig(BaseModel, ConfigMixin):
+class HttpConfig(BaseModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
 
 
-class MyAppSimpleConfig(BaseModel, AppConfigMixin):
+class MyAppSimpleConfig(AppBaseModel):
     run_at: int = Field(12, alias='run at')  # use alias to load from/create a different key
     http: HttpConfig = HttpConfig()
 
@@ -94,16 +99,17 @@ http:
   port: 443
 ```
 
+
 ### Comments
 It's possible to specify a description through the pydantic ``Field``.
 The description will be created as a comment in the .yml file
 
 ```python
-from pydantic import BaseModel, Field
-from easyconfig import AppConfigMixin, create_app_config
+from pydantic import Field
+from easyconfig import AppBaseModel, create_app_config
 
 
-class MySimpleAppConfig(BaseModel, AppConfigMixin):
+class MySimpleAppConfig(AppBaseModel):
     retries: int = Field(5, description='Amount of retries on error')
     url: str = 'localhost'
     port: int = 443
@@ -125,11 +131,10 @@ when the configuration gets loaded for the first time. A useful feature if the a
 of the configuration file (e.g. through a file watcher).
 
 ```python
-from pydantic import BaseModel
-from easyconfig import AppConfigMixin, create_app_config
+from easyconfig import AppBaseModel, create_app_config
 
 
-class MySimpleAppConfig(BaseModel, AppConfigMixin):
+class MySimpleAppConfig(AppBaseModel):
     retries: int = 5
     url: str = 'localhost'
     port: int = 443
@@ -152,6 +157,12 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.2 (25.03.2022)
+- Added convenience base classes ``AppBaseModel`` and ``BaseModel``
+- Works with private attributes and class functions
+- Fixed an issue where multiline comments would not be created properly
+- Added an option to exclude entries from config file
+
 #### 0.2.1 (25.03.2022)
 - Allow callbacks for file defaults
 

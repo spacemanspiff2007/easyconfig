@@ -1,9 +1,11 @@
+from inspect import getmembers, isfunction
 from typing import Any, Callable, Dict, List, Tuple, Type, TYPE_CHECKING, TypeVar, Union
 
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 from typing_extensions import Final
 
+from easyconfig import AppConfigMixin
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs import ConfigObjSubscription, SubscriptionParent
 from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowedError
@@ -16,6 +18,9 @@ HINT_CONFIG_OBJ = TypeVar('HINT_CONFIG_OBJ', bound='ConfigObj')
 HINT_CONFIG_OBJ_TYPE = Type[HINT_CONFIG_OBJ]
 
 
+NO_COPY = [n for n, o in getmembers(AppConfigMixin) if isfunction(o)]
+
+
 class ConfigObj:
     def __init__(self, model: BaseModel,
                  path: Tuple[str, ...] = ('__root__', ),
@@ -24,8 +29,9 @@ class ConfigObj:
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
-        self._obj_model_fields: Dict[str, ModelField] = model.__fields__
         self._obj_model_class: Final = model.__class__
+        self._obj_model_fields: Dict[str, ModelField] = model.__fields__
+        self._obj_model_private_attrs: List[str] = list(model.__private_attributes__.keys())
 
         self._obj_keys: Tuple[str, ...] = tuple()
         self._obj_values: Dict[str, Any] = {}
@@ -40,8 +46,21 @@ class ConfigObj:
                    path: Tuple[str, ...] = ('__root__', ),
                    parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING):
 
-        ret = cls(model, path, parent)
+        # Copy functions from the class definition to the child class
+        functions = {}
+        for name, member in getmembers(model.__class__):
+            if not name.startswith('_') and name not in NO_COPY and isfunction(member):
+                functions[name] = member
 
+        # Create a new class that pulls down the user defined functions if there are any
+        # It's not possible to attach the functions to the existing class instance
+        if functions:
+            new_cls = type(f'{model.__class__.__name__}{cls.__name__}', (cls, ), functions)
+            ret = new_cls(model, path, parent)
+        else:
+            ret = cls(model, path, parent)
+
+        # Set the values or create corresponding subclasses
         keys = []
         for key in ret._obj_model_fields.keys():
             value = getattr(model, key, MISSING)
@@ -62,12 +81,26 @@ class ConfigObj:
             # set child and values
             setattr(ret, key, attrib)
 
+        # copy private attributes - these are the same as values
+        for key in ret._obj_model_private_attrs:
+            value = getattr(model, key, MISSING)
+            if value is MISSING:
+                continue
+
+            keys.append(key)
+
+            ret._obj_values[key] = value
+            setattr(ret, key, value)
+
         ret._obj_keys = tuple(keys)
         return ret
 
     def _set_values(self, obj: BaseModel) -> bool:
         if not isinstance(obj, BaseModel):
             raise ValueError(f'Instance of {BaseModel.__class__.__name__} expected, got {obj} ({type(obj)})!')
+
+        # Update last model so we can delegate function calls
+        self._last_model = obj
 
         value_changed = False
 
@@ -88,7 +121,7 @@ class ConfigObj:
             value = getattr(obj, key, MISSING)
             if value is MISSING:
                 continue
-            old_value = self._obj_values[key]
+            old_value = self._obj_values.get(key, MISSING)
             self._obj_values[key] = value
 
             # Update only values, child objects change in place
@@ -107,9 +140,9 @@ class ConfigObj:
     def __repr__(self):
         return f'<{self.__class__.__name__} {".".join(self._obj_path)}>'
 
-    def __getattr__(self, item):
-        # delegate call to model
-        return getattr(self._last_model, item)
+    # def __getattr__(self, item):
+    #     # delegate call to model
+    #     return getattr(self._last_model, item)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes

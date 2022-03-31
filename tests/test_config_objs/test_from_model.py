@@ -1,6 +1,6 @@
 from typing import Tuple
 
-from pydantic import BaseModel
+from pydantic import BaseModel, PrivateAttr
 
 from easyconfig.config_objs import ConfigObj
 from easyconfig.models import ConfigMixin
@@ -63,3 +63,40 @@ def test_parse_submodel_tupels():
     assert isinstance(obj, ConfigObj)
     assert obj.a == 7
     assert obj._obj_path == ('__root__', 'a', '1')
+
+
+def test_func_call():
+    class SimpleModel(BaseModel):
+        a: int = 5
+        b: int = 6
+
+        def set_vars(self):
+            self.a = 1
+            self.b = 2
+            return self.a + self.b
+
+    o = ConfigObj.from_model(SimpleModel())
+    assert o.a == 5
+    assert o.b == 6
+
+    o.set_vars()
+    assert o.a == 1
+    assert o.b == 2
+
+
+def test_private_attr():
+    class SimpleModel(BaseModel):
+        a: int = 1
+        _b: int = PrivateAttr()
+        _c: int = PrivateAttr(3)
+
+        def set_vars(self):
+            self._b = 99
+
+    o = ConfigObj.from_model(SimpleModel())
+    assert o.a == 1
+    assert not hasattr(o, '_b')
+    assert o._c == 3
+
+    o.set_vars()
+    assert o._b == 99

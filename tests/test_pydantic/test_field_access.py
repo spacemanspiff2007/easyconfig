@@ -84,7 +84,18 @@ def test_env_access():
         b: ChildModel = Field(default_factory=ChildModel, description='desc a')
 
     obj = ParentModel()
-    assert obj.b.c_b == 3
 
-    assert 'a' in obj.__fields__
-    assert 'b' in obj.__fields__
+    assert obj.b.__fields__['c_a'].field_info.extra == {'env': 'my_env_var'}
+
+
+def test_private_attr():
+
+    class SimpleModel(BaseModel):
+        _priv2: int = PrivateAttr(default=3)
+        _priv3: int = PrivateAttr()
+        a: int = 3
+
+    SimpleModel()
+
+    assert list(SimpleModel.__fields__.keys()) == ['a', ]
+    assert list(SimpleModel.__private_attributes__.keys()) == ['_priv2', '_priv3']

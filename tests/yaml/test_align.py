@@ -34,6 +34,13 @@ def my_map():
     sub['b'] = 'an even longer text'
     sub.yaml_add_eol_comment('comment 4', 'a')
     sub.yaml_add_eol_comment('comment 5', 'b')
+
+    top['sub_key3'] = data = CommentedMap()
+    data['a'] = 'long text'
+    data.yaml_add_eol_comment('# This is a multiline\n# comment', 'a')
+    data['b'] = 'another long text'
+    data.yaml_add_eol_comment('#\n# Another\n\n# comment', 'b')
+
     yield top
 
 
@@ -54,6 +61,13 @@ sub_key2:
   c:
     a: long text            # comment 4
     b: an even longer text  # comment 5
+sub_key3:
+  a: long text          # This is a multiline
+                        # comment
+  b: another long text  #
+                        # Another
+
+                        # comment
 '''
 
     top = yaml_rt.load(io.StringIO(initial_value=file_contents))

@@ -3,7 +3,7 @@ from easyconfig.__version__ import __version__
 
 # isort: split
 
-from easyconfig.models import AppConfigMixin, ConfigMixin
+from easyconfig.models import AppBaseModel, AppBaseSettings, AppConfigMixin, BaseModel, BaseSettings, ConfigMixin
 
 # isort: split
 

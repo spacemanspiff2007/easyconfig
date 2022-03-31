@@ -6,7 +6,7 @@ from easyconfig.yaml import yaml_rt
 
 def align_comments(d, extra_indent=0):
 
-    # Only process when its a data structure -> dict or list
+    # Only process when it's a data structure -> dict or list
     is_dict = isinstance(d, dict)
     if not is_dict and not isinstance(d, list):
         return None
@@ -14,8 +14,23 @@ def align_comments(d, extra_indent=0):
     comments = d.ca.items.values()
     if comments:
         max_col = max(map(lambda x: x[2].column, comments), default=0)
+        indent_value = max_col + extra_indent
         for comment in comments:
-            comment[2].column = max_col + extra_indent
+            token = comment[2]
+            token.column = indent_value
+
+            # workaround for multiline eol comments
+            if '\n' in token.value:
+                c_lines = token.value.splitlines()  # type: list[str]
+                for i, line in enumerate(c_lines):
+                    # first line is automatically indendet correctly
+                    if not i:
+                        continue
+
+                    _line = line.lstrip()
+                    if _line:
+                        c_lines[i] = indent_value * ' ' + _line
+                token.value = '\n'.join(c_lines)
 
     for element in (d.values() if is_dict else d):
         align_comments(element, extra_indent=extra_indent)
