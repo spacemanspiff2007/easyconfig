@@ -30,3 +30,10 @@ class AppConfigMixin(ConfigMixin):
         :returns: True if config changed else False
         """
         pass
+
+    def generate_default_yaml(self) -> str:
+        """Generate the default YAML structure
+
+        :returns: YAML structure as a string
+        """
+        pass

@@ -10,7 +10,11 @@ class DuplicateSubscriptionError(EasyConfigError):
     pass
 
 
-class ReferenceFolderMissingError(EasyConfigError):
+class ExtraKwArgsNotAllowed(EasyConfigError):
+    pass
+
+
+class DefaultNotSet(EasyConfigError):
     pass
 
 

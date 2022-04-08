@@ -3,6 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from easyconfig.__const__ import ARG_NAME_IN_FILE
 from easyconfig.yaml.from_model import cmap_from_model
 from tests.helper import dump_yaml
 
@@ -51,7 +52,7 @@ def test_simple_model_description():
 def test_simple_model_skip_key():
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa', description='Key A')
-        b: int = Field(6, description='Key b', in_file=False)
+        b: int = Field(6, description='Key b', **{ARG_NAME_IN_FILE: False})
 
     assert dump_yaml(cmap_from_model(SimpleModel())) == \
         'aaa: 5  # Key A\n'
@@ -79,7 +80,7 @@ def test_skip_sub_model():
         ab: int = 6
 
     class SimpleModel(BaseModel):
-        a: SubModel = Field(SubModel(), in_file=False)
+        a: SubModel = Field(SubModel(), **{ARG_NAME_IN_FILE: False})
         b: int = 3
 
     assert dump_yaml(cmap_from_model(SimpleModel())) == 'b: 3\n'
@@ -99,3 +100,18 @@ def test_sub_model_alias_description():
   ab: 6
 b: 3
 '''
+
+
+def test_multiline_comment():
+
+    class SimpleModel(BaseModel):
+        a: str = Field('value a', description='This is\nthe topmost\nvalue of the model')
+        b: int = Field(3, description='\nThis is\nvalue b')
+
+    assert dump_yaml(cmap_from_model(SimpleModel())) == \
+        'a: value a  # This is\n' \
+        '# the topmost\n' \
+        '# value of the model\n' \
+        'b: 3 # \n' \
+        '# This is\n' \
+        '# value b\n'

@@ -1,13 +1,14 @@
-from inspect import isfunction
+from io import StringIO
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple, TypeVar, Union
+from typing import Optional, Tuple, Union
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel
 from typing_extensions import Self
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
 
+from ..errors import DefaultNotSet
 from .object_config import ConfigObj
 
 
@@ -43,9 +44,9 @@ class AppConfig(ConfigObj):
 
         # create default config file
         if self._file_defaults is not None and not self._file_path.is_file():
-            c_map = cmap_from_model(self._file_defaults)
+            __yaml = self.generate_default_yaml()
             with self._file_path.open(mode='w', encoding='utf-8') as f:
-                write_aligned_yaml(c_map, f, extra_indent=1)
+                f.write(__yaml)
 
         # Load data from file
         with self._file_path.open('r', encoding='utf-8') as file:
@@ -56,35 +57,12 @@ class AppConfig(ConfigObj):
         # load c_map data (which is a dict)
         self.load_config_dict(cfg)
 
+    def generate_default_yaml(self) -> str:
 
-TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
+        if self._file_defaults is None:
+            raise DefaultNotSet()
 
-
-def create_app_config(model: TYPE_WRAPPED,
-                      file_values: Union[MISSING_TYPE, None, BaseModel, Dict[str, Any],
-                                         Callable[[], Union[BaseModel, Dict[str, Any]]]] = MISSING,
-                      validate_file_values=True) -> TYPE_WRAPPED:
-
-    # Implicit default
-    if file_values is MISSING:
-        file_values = model
-
-    # if it's a callback we get the values
-    if isfunction(file_values):
-        file_values = file_values()
-
-    # Validate default
-    if file_values is not None:
-        if isinstance(file_values, dict):
-            if validate_file_values:
-                class NoExtraEntries(model.__class__, extra=Extra.forbid):
-                    pass
-                NoExtraEntries.parse_obj(file_values)
-
-            file_values = model.__class__.parse_obj(file_values)
-
-    app_cfg = AppConfig.from_model(model)
-
-    assert file_values is None or isinstance(file_values, BaseModel)
-    app_cfg._file_defaults = file_values
-    return app_cfg
+        buffer = StringIO()
+        c_map = cmap_from_model(self._file_defaults)
+        write_aligned_yaml(c_map, buffer, extra_indent=1)
+        return buffer.getvalue()

@@ -1,7 +1,7 @@
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
-from easyconfig.__const__ import MISSING
+from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap
 
 
@@ -17,7 +17,7 @@ def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
         yaml_key = field.alias
         description = field_info.description
 
-        if not field_info.extra.get('in_file', True):
+        if not field_info.extra.get(ARG_NAME_IN_FILE, True):
             continue
 
         if isinstance(value, BaseModel):

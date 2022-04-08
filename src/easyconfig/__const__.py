@@ -11,3 +11,6 @@ class _MissingType(Enum):
 
 MISSING: Final = _MissingType.MISSING_OBJ
 MISSING_TYPE: Final = Literal[_MissingType.MISSING_OBJ]
+
+
+ARG_NAME_IN_FILE: Final = 'in_file'

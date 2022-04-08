@@ -157,7 +157,11 @@ sub.cancel()
 ```
 
 # Changelog
-#### 0.2.2 (25.03.2022)
+#### 0.2.3 (08.04.2022)
+- Added extra kwargs check for pydantic fields
+- Added option to get generated yaml as a string
+
+#### 0.2.2 (31.03.2022)
 - Added convenience base classes ``AppBaseModel`` and ``BaseModel``
 - Works with private attributes and class functions
 - Fixed an issue where multiline comments would not be created properly

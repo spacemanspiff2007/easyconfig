@@ -1,4 +1,4 @@
-from io import BytesIO
+from io import StringIO
 from typing import Union
 
 from easyconfig.yaml import yaml_rt
@@ -55,7 +55,7 @@ def remove_none(obj: Union[dict]):
 def write_aligned_yaml(obj, file_obj, extra_indent: int = 0):
     assert extra_indent >= 0, extra_indent
 
-    buffer = BytesIO()
+    buffer = StringIO()
     yaml_rt.dump(obj, buffer)
 
     loaded_obj = yaml_rt.load(buffer.getvalue())

@@ -41,6 +41,10 @@ class ConfigObj:
 
         self._last_model: BaseModel = model
 
+    @property
+    def _full_obj_path(self) -> str:
+        return '.'.join(self._obj_path)
+
     @classmethod
     def from_model(cls, model: BaseModel,
                    path: Tuple[str, ...] = ('__root__', ),
@@ -138,7 +142,7 @@ class ConfigObj:
         return propagate
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} {".".join(self._obj_path)}>'
+        return f'<{self.__class__.__name__} {self._full_obj_path}>'
 
     # def __getattr__(self, item):
     #     # delegate call to model
@@ -150,7 +154,7 @@ class ConfigObj:
     def subscribe_for_changes(self, func: Callable[[], Any], propagate: bool = False, on_next_load: bool = True) \
             -> 'easyconfig.config_objs.ConfigObjSubscription':
 
-        target = f'{func.__name__} @ {".".join(self._obj_path)}'
+        target = f'{func.__name__} @ {self._full_obj_path}'
         for sub in self._obj_subscriptions:
             if sub.func is func:
                 raise DuplicateSubscriptionError(f'{target} is already subscribed!')
