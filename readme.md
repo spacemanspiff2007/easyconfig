@@ -157,6 +157,9 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.4 (19.04.2022)
+- Default values get validated, too
+
 #### 0.2.3 (08.04.2022)
 - Added extra kwargs check for pydantic fields
 - Added option to get generated yaml as a string
