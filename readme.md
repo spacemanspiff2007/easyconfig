@@ -157,6 +157,9 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.5 (XX.XX.2022)
+- Marked package as PEP 561 compatible (py.typed)
+
 #### 0.2.4 (19.04.2022)
 - Default values get validated, too
 
