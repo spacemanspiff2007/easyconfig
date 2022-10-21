@@ -49,6 +49,7 @@ setup(
         'GitHub': 'https://github.com/spacemanspiff2007/easyconfig',
     },
     package_dir={'': 'src'},
+    package_data={'easyconfig': ["py.typed"]},
     packages=find_packages('src', exclude=['tests*']),
     install_requires=load_req(),
     python_requires='>=3.8',
