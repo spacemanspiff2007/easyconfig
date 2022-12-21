@@ -1,7 +1,6 @@
 from enum import Enum
 
 from pydantic import BaseModel
-from pydantic.fields import ModelField
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap, CommentedSeq
@@ -10,13 +9,19 @@ NoneType = type(None)
 
 
 def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
+    if obj is None:
+        return None
+
     # Sometimes enum is used with int/str
     if isinstance(obj, Enum):
         return _get_yaml_value(obj.value, parent_model=parent_model, skip_none=skip_none)
 
     # yaml native datatypes
-    if isinstance(obj, (int, float, str, bool, bytes, NoneType)):
-        return obj
+    # Pydantic defines several validators that inherit from the python base type
+    # Yaml can't represent those, so we cast them back to the native data type.
+    for data_type in (int, float, str, bool, bytes):
+        if isinstance(obj, data_type):
+            return data_type(obj)
 
     if isinstance(obj, BaseModel):
         return cmap_from_model(obj, skip_none=skip_none)
@@ -43,7 +48,7 @@ def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
 
 def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
     cmap = CommentedMap()
-    for obj_key, field in model.__fields__.items():  # type: str, ModelField
+    for obj_key, field in model.__fields__.items():
         value = getattr(model, obj_key, MISSING)
         if value is MISSING or (skip_none and value is None):
             continue

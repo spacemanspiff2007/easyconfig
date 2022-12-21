@@ -157,6 +157,9 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.7 (09.01.2023)
+- Fixed default generation for data types that inherit from python base types
+
 #### 0.2.6 (21.12.2022)
 - Fixed an issue where the default yaml file would not be created properly when using aliases in container
 

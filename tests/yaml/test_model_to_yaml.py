@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AnyHttpUrl, BaseModel, ByteSize, Field
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE
 from easyconfig.yaml.from_model import cmap_from_model
@@ -15,6 +15,14 @@ def test_simple_model():
         b: int = 6
 
     assert dump_yaml(cmap_from_model(SimpleModel())) == 'a: 5\nb: 6\n'
+
+
+def test_base_overrides():
+    class SimpleModel(BaseModel):
+        size: ByteSize
+        url: AnyHttpUrl = 'http://test.de'
+
+    assert dump_yaml(cmap_from_model(SimpleModel(size=ByteSize(1024)))) == 'size: 1024\nurl: http://test.de\n'
 
 
 def test_simple_model_complex_types():

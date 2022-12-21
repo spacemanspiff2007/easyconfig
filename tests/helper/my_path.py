@@ -11,12 +11,15 @@ class Path(_path_type):
     def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
         super(Path, self).__init__()
 
-        # Pathlib init
-        drv, root, parts = self._parse_args(args)
-        self._drv = drv
-        self._root = root
-        self._parts = parts
-        self._init()
+        if hasattr(Path, '_from_parts'):
+            Path._from_parts(args)
+        else:
+            # Pathlib init
+            drv, root, parts = self._parse_args(args)
+            self._drv = drv
+            self._root = root
+            self._parts = parts
+            self._init()
 
         # Own Path implementation
         self.does_exist: bool = does_exist
