@@ -1,7 +1,6 @@
 from enum import Enum
 
 from pydantic import BaseModel
-from pydantic.fields import ModelField
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap, CommentedSeq
@@ -43,7 +42,7 @@ def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
 
 def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
     cmap = CommentedMap()
-    for obj_key, field in model.__fields__.items():  # type: str, ModelField
+    for obj_key, field in model.__fields__.items():
         value = getattr(model, obj_key, MISSING)
         if value is MISSING or (skip_none and value is None):
             continue
