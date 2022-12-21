@@ -1,5 +1,6 @@
 from datetime import datetime
-from typing import Optional
+from enum import Enum
+from typing import List, Optional
 
 from pydantic import BaseModel, Field
 
@@ -115,3 +116,24 @@ def test_multiline_comment():
         'b: 3 # \n' \
         '# This is\n' \
         '# value b\n'
+
+
+def test_alias_not_in_file():
+
+    class MyEnum(str, Enum):
+        A = 'aa'
+
+    class SimpleModel(BaseModel):
+        a: int = Field(5, alias='aaa', in_file=False)
+        b: int = Field(6, description='Description value b')
+        c: MyEnum = MyEnum.A
+
+    class EncapModel(BaseModel):
+        my_list: List[SimpleModel] = []
+
+    assert dump_yaml(cmap_from_model(EncapModel(my_list=[SimpleModel(), SimpleModel(b=5), ]))) == \
+        'my_list:\n' \
+        '- b: 6  # Description value b\n' \
+        '  c: aa\n' \
+        '- b: 5  # Description value b\n' \
+        '  c: aa\n'

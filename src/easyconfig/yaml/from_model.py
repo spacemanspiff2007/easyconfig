@@ -1,8 +1,44 @@
+from enum import Enum
+
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
-from easyconfig.yaml import CommentedMap
+from easyconfig.yaml import CommentedMap, CommentedSeq
+
+NoneType = type(None)
+
+
+def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
+    # Sometimes enum is used with int/str
+    if isinstance(obj, Enum):
+        return _get_yaml_value(obj.value, parent_model=parent_model, skip_none=skip_none)
+
+    # yaml native datatypes
+    if isinstance(obj, (int, float, str, bool, bytes, NoneType)):
+        return obj
+
+    if isinstance(obj, BaseModel):
+        return cmap_from_model(obj, skip_none=skip_none)
+
+    if isinstance(obj, (list, tuple, set, frozenset)):
+        seq = CommentedSeq()
+        for value in obj:
+            seq.append(_get_yaml_value(value, parent_model=parent_model, skip_none=skip_none))
+        return seq
+
+    if isinstance(obj, dict):
+        ret = CommentedMap()
+        for key, value in obj.items():
+            yaml_key = _get_yaml_value(key, parent_model=parent_model, skip_none=skip_none)
+            ret[yaml_key] = _get_yaml_value(value, parent_model=parent_model, skip_none=skip_none)
+        return ret
+
+    # YAML can't serialize all data pydantic types natively, so we use the json serializer of the model
+    # This works since a valid json is always a valid YAML. It's not nice but it's something!
+    model_cfg = parent_model.__config__
+    str_val = model_cfg.json_dumps(obj, default=parent_model.__json_encoder__)
+    return model_cfg.json_loads(str_val)
 
 
 def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
@@ -20,15 +56,8 @@ def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
         if not field_info.extra.get(ARG_NAME_IN_FILE, True):
             continue
 
-        if isinstance(value, BaseModel):
-            cmap[yaml_key] = cmap_from_model(value)
-        else:
-            # YAML can't serialize all data pydantic types natively, so we use the json serializer of the model
-            # This works since a valid json is always a valid YAML. It's not nice but it's something!
-            mode_cfg = model.__config__
-            _json_value = mode_cfg.json_dumps(
-                {'obj': value}, default=model.__json_encoder__)
-            cmap[yaml_key] = mode_cfg.json_loads(_json_value)['obj']
+        # get yaml representation
+        cmap[yaml_key] = _get_yaml_value(value, parent_model=model)
 
         if not description:
             continue

@@ -1,8 +1,12 @@
+from enum import Enum
+from typing import List
+
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
 from easyconfig import create_app_config
 from easyconfig.errors import DefaultNotSet, ExtraKwArgsNotAllowed
+from easyconfig.models import BaseModel as EasyBaseModel
 
 
 def test_simple():
@@ -58,3 +62,19 @@ def test_extra_kwargs():
         create_app_config(SimpleModelErr(aaa=99))
 
     assert str(e.value) == 'Extra kwargs for field "a" of SimpleModelErr are not allowed: in__file'
+
+
+def test_list_of_models():
+
+    class MyEnum(str, Enum):
+        A = 'aa'
+
+    class SimpleModel(EasyBaseModel):
+        a: int = Field(5, alias='aaa', in_file=False)
+        b: int = Field(6)
+        c: MyEnum = MyEnum.A
+
+    class EncapModel(EasyBaseModel):
+        c: List[SimpleModel] = []
+
+    create_app_config(EncapModel(c=[SimpleModel(), SimpleModel(), ]))

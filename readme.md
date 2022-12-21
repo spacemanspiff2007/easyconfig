@@ -157,6 +157,9 @@ sub.cancel()
 ```
 
 # Changelog
+#### 0.2.6 (21.12.2022)
+- Fixed an issue where the default yaml file would not be created properly when using aliases in container
+
 #### 0.2.5 (21.10.2022)
 - Marked package as PEP 561 compatible (py.typed)
 

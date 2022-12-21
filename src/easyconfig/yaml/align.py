@@ -1,22 +1,34 @@
 from io import StringIO
-from typing import Union
+from typing import Any, Optional, Tuple, Union
+
+from ruamel.yaml import CommentToken
 
 from easyconfig.yaml import yaml_rt
+
+
+def get_column(obj: Tuple[Any, Any, Optional[CommentToken], Any]):
+    if (token := obj[2]) is None:
+        return 0
+    return token.column
 
 
 def align_comments(d, extra_indent=0):
 
     # Only process when it's a data structure -> dict or list
     is_dict = isinstance(d, dict)
-    if not is_dict and not isinstance(d, list):
+    is_list = isinstance(d, list)
+    if not is_dict and not is_list:
         return None
 
     comments = d.ca.items.values()
+
     if comments:
-        max_col = max(map(lambda x: x[2].column, comments), default=0)
+        max_col = max(map(get_column, comments), default=0)
         indent_value = max_col + extra_indent
         for comment in comments:
             token = comment[2]
+            if token is None:
+                continue
             token.column = indent_value
 
             # workaround for multiline eol comments
