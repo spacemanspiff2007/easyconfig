@@ -3,4 +3,4 @@
 
 # testing dependencies
 pytest     >= 7.2,  < 8
-pre-commit >= 2.21, < 3
+pre-commit==3.0.2
