@@ -5,7 +5,7 @@ import pytest
 from pydantic import BaseModel, Field, ValidationError
 
 from easyconfig import create_app_config
-from easyconfig.errors import DefaultNotSet, ExtraKwArgsNotAllowed
+from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetError
 from easyconfig.models import BaseModel as EasyBaseModel
 
 
@@ -31,7 +31,7 @@ def test_default_yaml():
     assert a.generate_default_yaml() == 'aaa: 12\n'
 
     a = create_app_config(SimpleModel(), file_values=None)
-    with pytest.raises(DefaultNotSet):
+    with pytest.raises(FileDefaultsNotSetError):
         a.generate_default_yaml()
 
 
@@ -58,7 +58,7 @@ def test_extra_kwargs():
     class SimpleModelErr(BaseModel):
         a: int = Field(5, alias='aaa', in__file=False)
 
-    with pytest.raises(ExtraKwArgsNotAllowed) as e:
+    with pytest.raises(ExtraKwArgsNotAllowedError) as e:
         create_app_config(SimpleModelErr(aaa=99))
 
     assert str(e.value) == 'Extra kwargs for field "a" of SimpleModelErr are not allowed: in__file'

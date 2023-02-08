@@ -33,7 +33,7 @@ class ConfigObj:
         self._obj_model_fields: Dict[str, ModelField] = model.__fields__
         self._obj_model_private_attrs: List[str] = list(model.__private_attributes__.keys())
 
-        self._obj_keys: Tuple[str, ...] = tuple()
+        self._obj_keys: Tuple[str, ...] = ()
         self._obj_values: Dict[str, Any] = {}
         self._obj_children: Dict[str, Union[HINT_CONFIG_OBJ, Tuple[HINT_CONFIG_OBJ, ...]]] = {}
 
@@ -75,7 +75,7 @@ class ConfigObj:
 
             if isinstance(value, BaseModel):
                 ret._obj_children[key] = attrib = cls.from_model(value, path=path + (key,), parent=ret)
-            elif isinstance(value, tuple) and all(map(lambda x: isinstance(x, BaseModel), value)):
+            elif isinstance(value, tuple) and all(isinstance(x, BaseModel) for x in value):
                 ret._obj_children[key] = attrib = tuple(
                     cls.from_model(o, path=path + (key, str(i)), parent=ret) for i, o in enumerate(value)
                 )

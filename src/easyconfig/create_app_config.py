@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING, MISSING_TYPE
 from easyconfig.config_objs.app_config import AppConfig, yaml_rt
-from easyconfig.errors import ExtraKwArgsNotAllowed
+from easyconfig.errors import ExtraKwArgsNotAllowedError
 
 TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
 TYPE_DEFAULTS = Union[BaseModel, Dict[str, Any]]
@@ -18,11 +18,13 @@ def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
     for name, field in model._obj_model_fields.items():
         if not set(field.field_info.extra).issubset(allowed):
             forbidden = sorted(set(field.field_info.extra) - allowed)
-            raise ExtraKwArgsNotAllowed(f'Extra kwargs for field "{name}" of {model._last_model.__class__.__name__} '
-                                        f'are not allowed: {", ".join(forbidden)}')
+            raise ExtraKwArgsNotAllowedError(
+                f'Extra kwargs for field "{name}" of {model._last_model.__class__.__name__} are not allowed: '
+                f'{", ".join(forbidden)}'
+            )
 
     # Submodels
-    for name, sub_model in model._obj_children.items():
+    for sub_model in model._obj_children.values():
         if isinstance(sub_model, tuple):
             for _sub_model in sub_model:
                 check_field_args(model, allowed)

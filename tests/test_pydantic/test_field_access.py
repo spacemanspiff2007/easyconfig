@@ -46,7 +46,7 @@ def test_mutate(capsys):
     assert m.val_int == 'asdf'
 
     # set attr
-    setattr(m, 'val_int', 88)
+    setattr(m, 'val_int', 88)   # noqa: B010
     assert m.val_int == 88
 
     for name in m.__fields__:
