@@ -19,7 +19,7 @@ def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
     # yaml native datatypes
     # Pydantic defines several validators that inherit from the python base type
     # Yaml can't represent those, so we cast them back to the native data type.
-    for data_type in (int, float, str, bool, bytes):
+    for data_type in (bool, int, float, str, bytes):
         if isinstance(obj, data_type):
             return data_type(obj)
 

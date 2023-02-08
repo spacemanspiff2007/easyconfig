@@ -10,11 +10,11 @@ class DuplicateSubscriptionError(EasyConfigError):
     pass
 
 
-class ExtraKwArgsNotAllowed(EasyConfigError):
+class ExtraKwArgsNotAllowedError(EasyConfigError):
     pass
 
 
-class DefaultNotSet(EasyConfigError):
+class FileDefaultsNotSetError(EasyConfigError):
     pass
 
 

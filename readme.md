@@ -157,51 +157,54 @@ sub.cancel()
 ```
 
 # Changelog
-#### 0.2.7 (09.01.2023)
+#### 0.2.8 (2023-02-08)
+- Fix for StrictBool
+
+#### 0.2.7 (2023-01-09)
 - Fixed default generation for data types that inherit from python base types
 
-#### 0.2.6 (21.12.2022)
+#### 0.2.6 (2022-12-21)
 - Fixed an issue where the default yaml file would not be created properly when using aliases in container
 
-#### 0.2.5 (21.10.2022)
+#### 0.2.5 (2022-10-21)
 - Marked package as PEP 561 compatible (py.typed)
 
-#### 0.2.4 (19.04.2022)
+#### 0.2.4 (2022-04-19)
 - Default values get validated, too
 
-#### 0.2.3 (08.04.2022)
+#### 0.2.3 (2022-04-08)
 - Added extra kwargs check for pydantic fields
 - Added option to get generated yaml as a string
 
-#### 0.2.2 (31.03.2022)
+#### 0.2.2 (2022-03-31)
 - Added convenience base classes ``AppBaseModel`` and ``BaseModel``
 - Works with private attributes and class functions
 - Fixed an issue where multiline comments would not be created properly
 - Added an option to exclude entries from config file
 
-#### 0.2.1 (25.03.2022)
+#### 0.2.1 (2022-03-25)
 - Allow callbacks for file defaults
 
-#### 0.2.0 (25.03.2022)
+#### 0.2.0 (2022-03-25)
 - Switched to new and more flexible API
 - File default and config default are now separated
 
-#### 0.1.2 (08.03.2022)
+#### 0.1.2 (2022-03-08)
 - Comments get nicely intended
 - Fixed an issue with nested data structures
 - Allow to specify a different value for file creation
 
-#### 0.1.1 (26.02.2022)
+#### 0.1.1 (2022-02-26)
 - Fixed an issue with dynamic defaults
 - Optional values with default None will not be created in the yaml file
 
-#### 0.1.0 (10.01.2022)
+#### 0.1.0 (2022-01-10)
 - Updated requirements
 
-#### 0.0.2 (16.09.2021)
+#### 0.0.2 (2021-09-16)
 - Validate user defaults
 - Use json representation of values to get native yaml data types
 - Use enum values instead of enum types
 
-#### 0.0.1 (14.09.2021)
+#### 0.0.1 (2021-09-14)
 - Initial release

@@ -8,7 +8,7 @@ from typing_extensions import Self
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
 
-from ..errors import DefaultNotSet
+from ..errors import FileDefaultsNotSetError
 from .object_config import ConfigObj
 
 
@@ -60,7 +60,7 @@ class AppConfig(ConfigObj):
     def generate_default_yaml(self) -> str:
 
         if self._file_defaults is None:
-            raise DefaultNotSet()
+            raise FileDefaultsNotSetError()
 
         buffer = StringIO()
         c_map = cmap_from_model(self._file_defaults)

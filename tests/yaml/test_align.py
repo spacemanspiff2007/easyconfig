@@ -5,7 +5,7 @@ import pytest
 from easyconfig.yaml import CommentedMap, write_aligned_yaml, yaml_rt
 
 
-@pytest.fixture
+@pytest.fixture()
 def my_map():
     top = CommentedMap()
     top['sub_key1'] = data = CommentedMap()
@@ -41,7 +41,7 @@ def my_map():
     data['b'] = 'another long text'
     data.yaml_add_eol_comment('#\n# Another\n\n# comment', 'b')
 
-    yield top
+    return top
 
 
 def test_align(my_map: CommentedMap):

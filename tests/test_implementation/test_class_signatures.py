@@ -7,8 +7,9 @@ from easyconfig.models import AppConfigMixin, ConfigMixin
 
 
 @pytest.mark.parametrize(
-    'mixin_cls, impl_cls', ((AppConfigMixin, AppConfig), (AppConfig, AppConfigMixin),
-                            (ConfigMixin, ConfigObj), (ConfigObj, ConfigMixin), ))
+    ('mixin_cls', 'impl_cls'),
+    ((AppConfigMixin, AppConfig), (AppConfig, AppConfigMixin), (ConfigMixin, ConfigObj), (ConfigObj, ConfigMixin), )
+)
 def test_signatures_match(mixin_cls, impl_cls):
     """Ensure that the mixin and the implementation have the same signatures"""
 
