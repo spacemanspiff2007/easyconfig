@@ -21,7 +21,7 @@ class ExpansionLocation:
         return ExpansionLocation(loc=self.loc, stack=new_stack)
 
     def process_obj(self, name: str):
-        return ExpansionLocation(loc=self.loc + (name, ), stack=tuple())
+        return ExpansionLocation(loc=self.loc + (name, ), stack=())
 
     def location_str(self) -> str:
         loc = ('__root__', *self.loc)

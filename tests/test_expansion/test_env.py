@@ -1,7 +1,7 @@
 import logging
 
-from easyconfig.expansion.location import ExpansionLocation, log
 from easyconfig.expansion.load_var import parse_env_key, read_env_var
+from easyconfig.expansion.location import ExpansionLocation, log
 
 
 def test_parse_env_key():

@@ -2,7 +2,7 @@ import re
 from pathlib import Path
 from string import ascii_letters
 
-from .location import log, ExpansionLocation
+from .location import ExpansionLocation, log
 
 # https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 RE_WIN_PATH = re.compile(

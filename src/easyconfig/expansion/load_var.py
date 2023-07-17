@@ -1,6 +1,6 @@
 from os import environ
 
-from .location import log, ExpansionLocation
+from .location import ExpansionLocation, log
 
 
 def parse_env_key(key: str) -> tuple[str, str | None]:

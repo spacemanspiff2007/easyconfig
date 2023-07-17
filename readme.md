@@ -34,7 +34,7 @@ That way the users can have some guidance how to change the program behaviour.
 
 
 ### Expansion
-It's possible to use environment variable or files for expansion. Easyconfig will load all values 
+It's possible to use environment variable or files for expansion. Easyconfig will load all values
 
 # Changelog
 #### 0.3.0 (2023-XX-XX)

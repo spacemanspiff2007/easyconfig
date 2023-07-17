@@ -2,8 +2,8 @@ import logging
 
 import pytest
 
-from easyconfig.expansion.location import ExpansionLocation, log
 from easyconfig.expansion.load_file import is_path, parse_path_key, read_file_contents
+from easyconfig.expansion.location import ExpansionLocation, log
 
 
 @pytest.mark.parametrize(

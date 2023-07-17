@@ -1,10 +1,10 @@
 import datetime
 from typing import Dict, Set
 
-from pydantic import AnyHttpUrl, ConfigDict
+from pydantic import AnyHttpUrl
 from pydantic import BaseModel as _BaseModel
-from pydantic import ByteSize, condate, confloat, conint, conlist, conset, \
-    constr, Extra, NegativeFloat, StrictBool, StrictBytes, StrictInt
+from pydantic import ByteSize, condate, ConfigDict, confloat, conint, conlist, \
+    conset, constr, NegativeFloat, StrictBool, StrictBytes, StrictInt
 
 from easyconfig.yaml import CommentedMap, CommentedSeq
 from easyconfig.yaml.from_model import _get_yaml_value

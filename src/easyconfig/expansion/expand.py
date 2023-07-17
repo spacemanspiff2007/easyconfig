@@ -1,9 +1,8 @@
 import re
 
-from .location import ExpansionLocation
 from .load_file import is_path, read_file_contents
 from .load_var import read_env_var
-
+from .location import ExpansionLocation
 
 RE_REPLACE = re.compile(r'''
     (?<!\$)\$\{
@@ -58,7 +57,7 @@ def expand_text(text: str, /, loc: ExpansionLocation):
 
 def expand_obj(obj, loc: ExpansionLocation | None = None):
     if loc is None:
-        loc = ExpansionLocation(tuple(), tuple())
+        loc = ExpansionLocation((), ())
 
     if isinstance(obj, dict):
         for key, value in obj.items():

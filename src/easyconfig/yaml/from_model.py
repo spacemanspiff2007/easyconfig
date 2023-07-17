@@ -1,6 +1,6 @@
 from enum import Enum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap, CommentedSeq

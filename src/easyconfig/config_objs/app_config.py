@@ -6,11 +6,11 @@ from pydantic import BaseModel
 from typing_extensions import Self
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
+from easyconfig.expansion import expand_obj
 from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
 
 from ..errors import FileDefaultsNotSetError
 from .object_config import ConfigObj
-from easyconfig.expansion import expand_obj
 
 
 class AppConfig(ConfigObj):
