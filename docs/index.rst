@@ -7,6 +7,7 @@ Welcome to the easyconfig documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   usage
    class_reference
 
 

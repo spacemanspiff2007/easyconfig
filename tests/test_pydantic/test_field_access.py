@@ -1,7 +1,7 @@
 from typing import List
 
 from pydantic import BaseModel, Field, PrivateAttr
-from pydantic.fields import ModelField
+from pydantic.fields import FieldInfo
 
 
 class MyDataSet:
@@ -21,17 +21,17 @@ class MyModel(BaseModel):
 
 class UserModel(MyModel):
     val_int: int
-    val_str = 'test'
+    val_str: str = 'test'
     val_f: List[str] = Field(description='This key does this')
 
 
 def test_get_model_desc():
-    assert list(UserModel.__fields__.keys()) == ['val_int', 'val_f', 'val_str', ]
+    assert list(UserModel.model_fields.keys()) == ['val_int', 'val_str', 'val_f',]
 
-    for field in UserModel.__fields__.values():
-        assert isinstance(field, ModelField)
+    for field in UserModel.model_fields.values():
+        assert isinstance(field, FieldInfo)
 
-    assert UserModel.__fields__['val_f'].field_info.description == 'This key does this'
+    assert UserModel.model_fields['val_f'].description == 'This key does this'
 
 
 def test_mutate(capsys):
@@ -49,11 +49,11 @@ def test_mutate(capsys):
     setattr(m, 'val_int', 88)   # noqa: B010
     assert m.val_int == 88
 
-    for name in m.__fields__:
+    for name in m.model_fields:
         print(f'{name}: {getattr(m, name)}')
 
     captured = capsys.readouterr()
-    assert captured.out == "val_int: 88\nval_f: ['asdf']\nval_str: test\n"
+    assert captured.out == "val_int: 88\nval_str: test\nval_f: ['asdf']\n"
 
 
 def test_nested_models():
@@ -69,8 +69,8 @@ def test_nested_models():
     obj = ParentModel()
     assert obj.b.c_b == 3
 
-    assert 'a' in obj.__fields__
-    assert 'b' in obj.__fields__
+    assert 'a' in obj.model_fields
+    assert 'b' in obj.model_fields
 
 
 def test_env_access():
@@ -85,7 +85,7 @@ def test_env_access():
 
     obj = ParentModel()
 
-    assert obj.b.__fields__['c_a'].field_info.extra == {'env': 'my_env_var'}
+    assert obj.b.model_fields['c_a'].json_schema_extra == {'env': 'my_env_var'}
 
 
 def test_private_attr():
@@ -97,5 +97,5 @@ def test_private_attr():
 
     SimpleModel()
 
-    assert list(SimpleModel.__fields__.keys()) == ['a', ]
+    assert list(SimpleModel.model_fields.keys()) == ['a', ]
     assert list(SimpleModel.__private_attributes__.keys()) == ['_priv2', '_priv3']

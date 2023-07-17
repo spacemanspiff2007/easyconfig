@@ -2,7 +2,7 @@ from inspect import getmembers, isfunction
 from typing import Any, Callable, Dict, List, Tuple, Type, TYPE_CHECKING, TypeVar, Union
 
 from pydantic import BaseModel
-from pydantic.fields import ModelField
+from pydantic.fields import FieldInfo
 from typing_extensions import Final
 
 from easyconfig import AppConfigMixin
@@ -30,7 +30,7 @@ class ConfigObj:
         self._obj_path: Final = path
 
         self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: Dict[str, ModelField] = model.__fields__
+        self._obj_model_fields: Dict[str, FieldInfo] = model.model_fields
         self._obj_model_private_attrs: List[str] = list(model.__private_attributes__.keys())
 
         self._obj_keys: Tuple[str, ...] = ()
@@ -153,6 +153,13 @@ class ConfigObj:
     # ------------------------------------------------------------------------------------------------------------------
     def subscribe_for_changes(self, func: Callable[[], Any], propagate: bool = False, on_next_load: bool = True) \
             -> 'easyconfig.config_objs.ConfigObjSubscription':
+        """When a value in this container changes the passed function will be called.
+
+        :param func: function which will be called
+        :param propagate: Propagate the change event to the parent object
+        :param on_next_load: Call the function the next time when values get loaded even if there is no value change
+        :return: object which can be used to cancel the subscription
+        """
 
         target = f'{func.__name__} @ {self._full_obj_path}'
         for sub in self._obj_subscriptions:
@@ -162,6 +169,8 @@ class ConfigObj:
         sub = SubscriptionParent(func, self, propagate=propagate, on_next=on_next_load)
         self._obj_subscriptions.append(sub)
         return ConfigObjSubscription(sub, target)
+
+
 
     @classmethod
     def parse_obj(cls, *args, **kwargs):

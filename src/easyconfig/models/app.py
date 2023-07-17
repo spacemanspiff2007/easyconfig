@@ -14,20 +14,19 @@ class AppConfigMixin(ConfigMixin):
         """
         pass
 
-    def load_config_dict(self, cfg: dict):
-        """Load values from a dictionary
+    def load_config_dict(self, cfg: dict, /, expansion: bool = True):
+        """Load the configuration from a dictionary
 
-        :param cfg: dictionary containing all the keys
-        :returns: True if config changed else False
+        :param cfg: config dict which will be loaded
+        :param expansion: Expand ${...} in strings
         """
         pass
 
-    def load_config_file(self, path: Union[Path, str] = None):
-        """Load values from the configuration file. If the file doesn't exist it will be created.
-        Missing required config entries will also be created.
+    def load_config_file(self, path: Union[Path, str] = None, expansion: bool = True):
+        """Load configuration from a yaml file. If the file does not exist a default file will be created
 
-        :param path: if not already set a path instance to the config file
-        :returns: True if config changed else False
+        :param path: Path to file
+        :param expansion: Expand ${...} in strings
         """
         pass
 

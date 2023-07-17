@@ -1,31 +1,21 @@
 import pydantic
+import pydantic_settings
+from pydantic import ConfigDict
 
 from easyconfig.models import AppConfigMixin, ConfigMixin
 
 
 class BaseModel(pydantic.BaseModel, ConfigMixin):
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        validate_all = True
+    model_config = ConfigDict(extra='forbid', validate_default=True)
 
 
 class AppBaseModel(pydantic.BaseModel, AppConfigMixin):
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        validate_all = True
+    model_config = ConfigDict(extra='forbid', validate_default=True)
 
 
-class BaseSettings(pydantic.BaseSettings, ConfigMixin):
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        validate_all = True
+class BaseSettings(pydantic_settings.BaseSettings, ConfigMixin):
+    model_config = ConfigDict(extra='forbid', validate_default=True)
 
 
-class AppBaseSettings(pydantic.BaseSettings, AppConfigMixin):
-
-    class Config:
-        extra = pydantic.Extra.forbid
-        validate_all = True
+class AppBaseSettings(pydantic_settings.BaseSettings, AppConfigMixin):
+    model_config = ConfigDict(extra='forbid', validate_default=True)

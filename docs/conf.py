@@ -34,6 +34,7 @@ release = easyconfig.__version__
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx_autodoc_typehints',
+    'sphinx_exec_code'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
