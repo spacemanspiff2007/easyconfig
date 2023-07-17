@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from typing_extensions import Self
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
+from easyconfig.expansion import expand_obj
 from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
 
 from ..errors import FileDefaultsNotSetError
@@ -21,23 +22,42 @@ class AppConfig(ConfigObj):
         self._file_path: Optional[Path] = None
 
     def set_file_path(self, path: Union[Path, str]):
+        """Set the path to the configuration file.
+        If no file extension is specified ``.yml`` will be automatically appended.
+
+        :param path: Path obj or str
+        """
         if isinstance(path, str):
             path = Path(path)
         if not isinstance(path, Path):
-            raise RuntimeError(f'Path to configuration file not specified: {path}')
+            raise ValueError(f'Path to configuration file not of type Path: {path} ({type(path)})')
 
         self._file_path = path.resolve()
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict):
+    def load_config_dict(self, cfg: dict, /, expansion: bool = True):
+        """Load the configuration from a dictionary
+
+        :param cfg: config dict which will be loaded
+        :param expansion: Expand ${...} in strings
+        """
+        if expansion:
+            expand_obj(cfg)
+
         # validate data
         model_obj = self._obj_model_class(**cfg)
 
         # update mutable objects
         self._set_values(model_obj)
+        return self
 
-    def load_config_file(self, path: Union[Path, str] = None):
+    def load_config_file(self, path: Union[Path, str] = None, expansion: bool = True):
+        """Load configuration from a yaml file. If the file does not exist a default file will be created
+
+        :param path: Path to file
+        :param expansion: Expand ${...} in strings
+        """
         if path is not None:
             self.set_file_path(path)
         assert isinstance(self._file_path, Path)
@@ -55,10 +75,14 @@ class AppConfig(ConfigObj):
             cfg = CommentedMap()
 
         # load c_map data (which is a dict)
-        self.load_config_dict(cfg)
+        self.load_config_dict(cfg, expansion=expansion)
+        return self
 
     def generate_default_yaml(self) -> str:
+        """Generate the default YAML structure
 
+        :returns: YAML structure as a string
+        """
         if self._file_defaults is None:
             raise FileDefaultsNotSetError()
 

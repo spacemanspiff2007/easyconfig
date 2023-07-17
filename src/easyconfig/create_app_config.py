@@ -11,13 +11,16 @@ TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
 TYPE_DEFAULTS = Union[BaseModel, Dict[str, Any]]
 
 
+# noinspection PyProtectedMember
 def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
     """Check extra args of pydantic fields"""
 
     # Model fields
     for name, field in model._obj_model_fields.items():
-        if not set(field.field_info.extra).issubset(allowed):
-            forbidden = sorted(set(field.field_info.extra) - allowed)
+        if (extras := field.json_schema_extra) is None:
+            continue
+        if not set(extras).issubset(allowed):
+            forbidden = sorted(set(extras) - allowed)
             raise ExtraKwArgsNotAllowedError(
                 f'Extra kwargs for field "{name}" of {model._last_model.__class__.__name__} are not allowed: '
                 f'{", ".join(forbidden)}'
@@ -71,6 +74,6 @@ def create_app_config(
     if file_values is not None and validate_file_values:
         _yaml = app_cfg.generate_default_yaml()
         _dict = yaml_rt.load(_yaml)
-        model.__class__.parse_obj(_dict)
+        model.__class__.model_validate(_dict)
 
     return app_cfg

@@ -3,18 +3,15 @@ from typing import Dict, Set
 
 from pydantic import AnyHttpUrl
 from pydantic import BaseModel as _BaseModel
-from pydantic import ByteSize, condate, confloat, conint, conlist, conset, \
-    constr, Extra, NegativeFloat, StrictBool, StrictBytes, StrictInt
+from pydantic import ByteSize, condate, ConfigDict, confloat, conint, conlist, \
+    conset, constr, NegativeFloat, StrictBool, StrictBytes, StrictInt
 
 from easyconfig.yaml import CommentedMap, CommentedSeq
 from easyconfig.yaml.from_model import _get_yaml_value
 
 
 class BaseModel(_BaseModel):
-    class Config:
-        extra = Extra.forbid
-        validate_all = True
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True, validate_default=True, extra='forbid')
 
 
 def cmp_value(obj, target):
@@ -52,7 +49,7 @@ def test_constrained_types():
         con_int: conint(ge=10) = 11
         con_str: constr(strip_whitespace=True) = '  asdf  '
 
-        con_list: conlist(str) = [1]
+        con_list: conlist(str) = ['1']
         con_set: conset(bool) = {1}
 
         con_date: condate(ge=datetime.date(2023, 1, 1)) = datetime.date(2023, 1, 2)
@@ -66,10 +63,10 @@ def test_constrained_types():
     cmp_value(_get_yaml_value(m.con_int, m), 11)
     cmp_value(_get_yaml_value(m.con_str, m), 'asdf')
 
-    cmp_value(_get_yaml_value(m.con_list, m), CommentedSeq(['1']))
-    cmp_value(_get_yaml_value(m.con_set, m), CommentedSeq([True]))
+    cmp_value(_get_yaml_value(m.con_list, m, obj_name='con_list'), CommentedSeq(['1']))
+    cmp_value(_get_yaml_value(m.con_set, m, obj_name='con_list'), CommentedSeq([True]))
 
-    cmp_value(_get_yaml_value(m.con_date, m), '2023-01-02')  # yaml can't natively serialize dates
+    cmp_value(_get_yaml_value(m.con_date, m, obj_name='con_date'), '2023-01-02')  # yaml can't natively serialize dates
 
 
 def test_strict_types():
@@ -101,11 +98,11 @@ def test_more_types():
         size_raw: ByteSize = 100
         size_str: ByteSize = '10kb'
         size_obj: ByteSize = ByteSize(50)
-        url: AnyHttpUrl = 'http://test.de'
+        url: AnyHttpUrl = 'http://test.de/asdf'
 
     m = SimpleModel()
 
     assert _get_yaml_value(m.size_raw, m) == 100
     assert _get_yaml_value(m.size_str, m) == 10_000
     assert _get_yaml_value(m.size_obj, m) == 50
-    assert _get_yaml_value(m.url, m) == 'http://test.de'
+    assert _get_yaml_value(m.url, m, obj_name='url') == 'http://test.de/asdf'

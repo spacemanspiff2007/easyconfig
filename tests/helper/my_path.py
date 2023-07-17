@@ -9,7 +9,7 @@ class Path(_path_type):
     _flavour = _path_type._flavour
 
     def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
-        super(Path, self).__init__()
+        super().__init__()
 
         if hasattr(Path, '_from_parts'):
             Path._from_parts(args)
@@ -27,7 +27,7 @@ class Path(_path_type):
         self._create_buffer(initial_value)
 
     def __new__(cls, *args, **kwargs):
-        return super(Path, cls).__new__(cls, *args)
+        return super().__new__(cls, *args)
 
     def _create_buffer(self, initial_value: Optional[str] = None):
         self.contents = StringIO(initial_value)

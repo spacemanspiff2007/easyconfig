@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from enum import Enum
 
 from pydantic import BaseModel
@@ -8,7 +10,7 @@ from easyconfig.yaml import CommentedMap, CommentedSeq
 NoneType = type(None)
 
 
-def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
+def _get_yaml_value(obj, parent_model: BaseModel, *, skip_none=True, obj_name: str | None = None):
     if obj is None:
         return None
 
@@ -39,30 +41,29 @@ def _get_yaml_value(obj, parent_model: BaseModel, skip_none=True):
             ret[yaml_key] = _get_yaml_value(value, parent_model=parent_model, skip_none=skip_none)
         return ret
 
-    # YAML can't serialize all data pydantic types natively, so we use the json serializer of the model
+    # YAML can't serialize all data pydantic types natively, so we use the serializer of the model
     # This works since a valid json is always a valid YAML. It's not nice but it's something!
-    model_cfg = parent_model.__config__
-    str_val = model_cfg.json_dumps(obj, default=parent_model.__json_encoder__)
-    return model_cfg.json_loads(str_val)
+    dump = parent_model.model_dump(mode='json', include={obj_name})
+    return dump[obj_name]
 
 
 def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
     cmap = CommentedMap()
-    for obj_key, field in model.__fields__.items():
-        value = getattr(model, obj_key, MISSING)
+    for obj_name, field in model.model_fields.items():
+        value = getattr(model, obj_name, MISSING)
         if value is MISSING or (skip_none and value is None):
             continue
 
-        field_info = field.field_info
-
         yaml_key = field.alias
-        description = field_info.description
+        if yaml_key is None:
+            yaml_key = obj_name
+        description = field.description
 
-        if not field_info.extra.get(ARG_NAME_IN_FILE, True):
+        if (extra_kwargs := field.json_schema_extra) is not None and not extra_kwargs.get(ARG_NAME_IN_FILE, True):
             continue
 
         # get yaml representation
-        cmap[yaml_key] = _get_yaml_value(value, parent_model=model)
+        cmap[yaml_key] = _get_yaml_value(value, parent_model=model, obj_name=obj_name)
 
         if not description:
             continue
