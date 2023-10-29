@@ -1,4 +1,4 @@
 pydantic            >= 2.0,     < 3.0
 pydantic-settings   >= 2.0,     < 3.0
-ruamel.yaml         >= 0.17,    < 0.18
+ruamel.yaml==0.18.3
 typing-extensions   >= 4.4,     < 5
