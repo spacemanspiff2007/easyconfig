@@ -21,10 +21,11 @@ def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
             continue
         if not set(extras).issubset(allowed):
             forbidden = sorted(set(extras) - allowed)
-            raise ExtraKwArgsNotAllowedError(
+            msg = (
                 f'Extra kwargs for field "{name}" of {model._last_model.__class__.__name__} are not allowed: '
                 f'{", ".join(forbidden)}'
             )
+            raise ExtraKwArgsNotAllowedError(msg)
 
     # Submodels
     for sub_model in model._obj_children.values():
@@ -35,9 +36,9 @@ def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
             check_field_args(sub_model, allowed)
 
 
-def get_file_values(model: TYPE_WRAPPED, file_values: Union[
-                    MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING) -> Optional[BaseModel]:
-
+def get_file_values(
+    model: TYPE_WRAPPED, file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING
+) -> Optional[BaseModel]:
     # Implicit default
     if file_values is MISSING:
         file_values = model
@@ -51,18 +52,18 @@ def get_file_values(model: TYPE_WRAPPED, file_values: Union[
         file_values = model.__class__.parse_obj(file_values)
 
     if file_values is not None and not isinstance(file_values, BaseModel):
-        raise ValueError(
-            f'Default must be None or an instance of {BaseModel.__class__.__name__}! Got {type(file_values)}')
+        msg = f'Default must be None or an instance of {BaseModel.__class__.__name__}! Got {type(file_values)}'
+        raise ValueError(msg)
 
     return file_values
 
 
 def create_app_config(
-        model: TYPE_WRAPPED,
-        file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING,
-        validate_file_values=True,
-        check_field_extra_args: Optional[Iterable[str]] = (ARG_NAME_IN_FILE, )) -> TYPE_WRAPPED:
-
+    model: TYPE_WRAPPED,
+    file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING,
+    validate_file_values=True,
+    check_field_extra_args: Optional[Iterable[str]] = (ARG_NAME_IN_FILE,),
+) -> TYPE_WRAPPED:
     app_cfg = AppConfig.from_model(model)
     app_cfg._file_defaults = get_file_values(model, file_values)
 

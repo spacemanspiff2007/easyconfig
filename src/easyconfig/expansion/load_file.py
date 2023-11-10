@@ -32,7 +32,6 @@ def is_path(txt: str) -> bool:
 
 
 def parse_path_key(txt: str) -> tuple[str, str | None]:
-
     parts = txt.split(':', 1)
 
     # we have no default

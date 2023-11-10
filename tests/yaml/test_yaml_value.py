@@ -1,10 +1,24 @@
+# ruff: noqa: RUF012
+
 import datetime
 from typing import Dict, Set
 
-from pydantic import AnyHttpUrl
+from pydantic import (
+    AnyHttpUrl,
+    ByteSize,
+    ConfigDict,
+    NegativeFloat,
+    StrictBool,
+    StrictBytes,
+    StrictInt,
+    condate,
+    confloat,
+    conint,
+    conlist,
+    conset,
+    constr,
+)
 from pydantic import BaseModel as _BaseModel
-from pydantic import ByteSize, condate, ConfigDict, confloat, conint, conlist, \
-    conset, constr, NegativeFloat, StrictBool, StrictBytes, StrictInt
 
 from easyconfig.yaml import CommentedMap, CommentedSeq
 from easyconfig.yaml.from_model import _get_yaml_value
@@ -20,7 +34,6 @@ def cmp_value(obj, target):
 
 
 def test_built_in_types():
-
     class ConstrainedModel(BaseModel):
         is_bool: bool = True
         is_int: int = 10
@@ -40,7 +53,6 @@ def test_built_in_types():
 
 
 def test_constrained_types():
-
     class ConstrainedModel(BaseModel):
         negative_float: NegativeFloat = -5
         negative_int: NegativeFloat = -3
@@ -70,7 +82,6 @@ def test_constrained_types():
 
 
 def test_strict_types():
-
     class StrictModel(BaseModel):
         strict_bool_true: StrictBool = True
         strict_bool_false: StrictBool = False

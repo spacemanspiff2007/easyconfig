@@ -26,7 +26,11 @@ class UserModel(MyModel):
 
 
 def test_get_model_desc():
-    assert list(UserModel.model_fields.keys()) == ['val_int', 'val_str', 'val_f',]
+    assert list(UserModel.model_fields.keys()) == [
+        'val_int',
+        'val_str',
+        'val_f',
+    ]
 
     for field in UserModel.model_fields.values():
         assert isinstance(field, FieldInfo)
@@ -46,7 +50,7 @@ def test_mutate(capsys):
     assert m.val_int == 'asdf'
 
     # set attr
-    setattr(m, 'val_int', 88)   # noqa: B010
+    setattr(m, 'val_int', 88)  # noqa: B010, RUF100
     assert m.val_int == 88
 
     for name in m.model_fields:
@@ -57,7 +61,6 @@ def test_mutate(capsys):
 
 
 def test_nested_models():
-
     class ChildModel(BaseModel):
         c_a: str = Field(3, description='desc c_a')
         c_b: int = Field(3, description='desc c_b')
@@ -74,7 +77,6 @@ def test_nested_models():
 
 
 def test_env_access():
-
     class ChildModel(BaseModel):
         c_a: str = Field(3, description='desc c_a', env='my_env_var')
         c_b: int = Field(3, description='desc c_b')
@@ -89,7 +91,6 @@ def test_env_access():
 
 
 def test_private_attr():
-
     class SimpleModel(BaseModel):
         _priv2: int = PrivateAttr(default=3)
         _priv3: int = PrivateAttr()
@@ -97,5 +98,7 @@ def test_private_attr():
 
     SimpleModel()
 
-    assert list(SimpleModel.model_fields.keys()) == ['a', ]
+    assert list(SimpleModel.model_fields.keys()) == [
+        'a',
+    ]
     assert list(SimpleModel.__private_attributes__.keys()) == ['_priv2', '_priv3']

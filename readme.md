@@ -40,6 +40,9 @@ That way the users can have some guidance how to change the program behaviour.
 It's possible to use environment variable or files for expansion. Easyconfig will load all values
 
 # Changelog
+#### 0.3.1 (2023-11-10)
+- Updated dependencies and code linters
+
 #### 0.3.0 (2023-03-17)
 - Breaking: requires pydantic 2.0
 - Added support for variable expansion through environment variables and docker secrets

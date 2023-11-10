@@ -1,8 +1,7 @@
 from inspect import getmembers, isfunction
-from typing import Any, Callable, Dict, Final, List, Tuple, Type, TYPE_CHECKING, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel
-from pydantic.fields import FieldInfo
 
 from easyconfig import AppConfigMixin
 from easyconfig.__const__ import MISSING, MISSING_TYPE
@@ -10,21 +9,23 @@ from easyconfig.config_objs import ConfigObjSubscription, SubscriptionParent
 from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowedError
 
 if TYPE_CHECKING:
-    import easyconfig
+    from pydantic.fields import FieldInfo
 
+    import easyconfig
 
 HINT_CONFIG_OBJ = TypeVar('HINT_CONFIG_OBJ', bound='ConfigObj')
 HINT_CONFIG_OBJ_TYPE = Type[HINT_CONFIG_OBJ]
-
 
 NO_COPY = [n for n, o in getmembers(AppConfigMixin) if isfunction(o)]
 
 
 class ConfigObj:
-    def __init__(self, model: BaseModel,
-                 path: Tuple[str, ...] = ('__root__', ),
-                 parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING):
-
+    def __init__(
+        self,
+        model: BaseModel,
+        path: Tuple[str, ...] = ('__root__',),
+        parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
+    ):
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
@@ -45,10 +46,12 @@ class ConfigObj:
         return '.'.join(self._obj_path)
 
     @classmethod
-    def from_model(cls, model: BaseModel,
-                   path: Tuple[str, ...] = ('__root__', ),
-                   parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING):
-
+    def from_model(
+        cls,
+        model: BaseModel,
+        path: Tuple[str, ...] = ('__root__',),
+        parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
+    ):
         # Copy functions from the class definition to the child class
         functions = {}
         for name, member in getmembers(model.__class__):
@@ -58,14 +61,14 @@ class ConfigObj:
         # Create a new class that pulls down the user defined functions if there are any
         # It's not possible to attach the functions to the existing class instance
         if functions:
-            new_cls = type(f'{model.__class__.__name__}{cls.__name__}', (cls, ), functions)
+            new_cls = type(f'{model.__class__.__name__}{cls.__name__}', (cls,), functions)
             ret = new_cls(model, path, parent)
         else:
             ret = cls(model, path, parent)
 
         # Set the values or create corresponding subclasses
         keys = []
-        for key in ret._obj_model_fields.keys():
+        for key in ret._obj_model_fields:
             value = getattr(model, key, MISSING)
             if value is MISSING:
                 continue
@@ -73,10 +76,10 @@ class ConfigObj:
             keys.append(key)
 
             if isinstance(value, BaseModel):
-                ret._obj_children[key] = attrib = cls.from_model(value, path=path + (key,), parent=ret)
+                ret._obj_children[key] = attrib = cls.from_model(value, path=(*path, key), parent=ret)
             elif isinstance(value, tuple) and all(isinstance(x, BaseModel) for x in value):
                 ret._obj_children[key] = attrib = tuple(
-                    cls.from_model(o, path=path + (key, str(i)), parent=ret) for i, o in enumerate(value)
+                    cls.from_model(o, path=(*path, key, str(i)), parent=ret) for i, o in enumerate(value)
                 )
             else:
                 ret._obj_values[key] = attrib = value
@@ -100,7 +103,8 @@ class ConfigObj:
 
     def _set_values(self, obj: BaseModel) -> bool:
         if not isinstance(obj, BaseModel):
-            raise ValueError(f'Instance of {BaseModel.__class__.__name__} expected, got {obj} ({type(obj)})!')
+            msg = f'Instance of {BaseModel.__class__.__name__} expected, got {obj} ({type(obj)})!'
+            raise TypeError(msg)
 
         # Update last model so we can delegate function calls
         self._last_model = obj
@@ -150,8 +154,9 @@ class ConfigObj:
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------
-    def subscribe_for_changes(self, func: Callable[[], Any], propagate: bool = False, on_next_load: bool = True) \
-            -> 'easyconfig.config_objs.ConfigObjSubscription':
+    def subscribe_for_changes(
+        self, func: Callable[[], Any], propagate: bool = False, on_next_load: bool = True
+    ) -> 'easyconfig.config_objs.ConfigObjSubscription':
         """When a value in this container changes the passed function will be called.
 
         :param func: function which will be called
@@ -163,13 +168,12 @@ class ConfigObj:
         target = f'{func.__name__} @ {self._full_obj_path}'
         for sub in self._obj_subscriptions:
             if sub.func is func:
-                raise DuplicateSubscriptionError(f'{target} is already subscribed!')
+                msg = f'{target} is already subscribed!'
+                raise DuplicateSubscriptionError(msg)
 
         sub = SubscriptionParent(func, self, propagate=propagate, on_next=on_next_load)
         self._obj_subscriptions.append(sub)
         return ConfigObjSubscription(sub, target)
-
-
 
     @classmethod
     def parse_obj(cls, *args, **kwargs):

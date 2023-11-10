@@ -17,7 +17,6 @@ RE_ESCAPED = re.compile(RE_REPLACE.pattern.replace(r'(?<!\$)', r'\$'), re.VERBOS
 
 
 def read_value(key: str, /, full_match: bool, loc: ExpansionLocation) -> tuple[str, str]:
-
     if is_path(key):
         name, value = read_file_contents(key, loc)
     else:
@@ -65,9 +64,10 @@ def expand_obj(obj, loc: ExpansionLocation | None = None):
         for key, value in obj.items():
             obj[key] = expand_obj(value, loc.process_obj(str(key)))
         return obj
-    elif isinstance(obj, (list, tuple)):
+
+    if isinstance(obj, (list, tuple)):
         for i, value in enumerate(obj):
             obj[i] = expand_obj(value, loc.process_obj(f'[{i:d}]'))
         return obj
-    else:
-        return expand_text(obj, loc)
+
+    return expand_text(obj, loc)

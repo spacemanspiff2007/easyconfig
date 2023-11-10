@@ -1,7 +1,7 @@
 import pytest
 
 from easyconfig.errors.errors import CyclicEnvironmentVariableReferenceError
-from easyconfig.expansion.expand import expand_obj, expand_text, RE_REPLACE
+from easyconfig.expansion.expand import RE_REPLACE, expand_obj, expand_text
 from easyconfig.expansion.location import ExpansionLocation
 
 
@@ -17,11 +17,9 @@ def test_regex():
 
 
 def test_load_env(envs: dict):
-    envs.update({
-        'NAME': 'asdf', 'RECURSE': 'Name: ${NAME}',
-        'TEST_$_DOLLAR': 'DOLLAR_WORKS',
-        'TEST_}_CURLY': 'CURLY_WORKS'
-    })
+    envs.update(
+        {'NAME': 'asdf', 'RECURSE': 'Name: ${NAME}', 'TEST_$_DOLLAR': 'DOLLAR_WORKS', 'TEST_}_CURLY': 'CURLY_WORKS'}
+    )
 
     loc = ExpansionLocation((), ())
 
@@ -50,7 +48,7 @@ def test_env_cyclic_reference(envs: dict):
     envs.update({'NAME': '${SELF}', 'SELF': 'Name: ${SELF}'})
 
     with pytest.raises(CyclicEnvironmentVariableReferenceError) as e:
-        assert expand_text('Test self: ${NAME}', loc=ExpansionLocation(loc=('a', ), stack=())) == 'asdf'
+        assert expand_text('Test self: ${NAME}', loc=ExpansionLocation(loc=('a',), stack=())) == 'asdf'
 
     assert str(e.value) == 'Cyclic environment variable reference: NAME -> SELF -> SELF (at __root__.a)'
 
@@ -58,14 +56,8 @@ def test_env_cyclic_reference(envs: dict):
 def test_expansion(envs: dict):
     envs.update({'NAME': 'ASDF'})
 
-    obj = {
-        'a': {'b': ['${NAME}']},
-        'b': '${MISSING:DEFAULT}'
-    }
+    obj = {'a': {'b': ['${NAME}']}, 'b': '${MISSING:DEFAULT}'}
 
     expand_obj(obj)
 
-    assert obj == {
-        'a': {'b': ['ASDF']},
-        'b': 'DEFAULT'
-    }
+    assert obj == {'a': {'b': ['ASDF']}, 'b': 'DEFAULT'}

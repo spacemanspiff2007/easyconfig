@@ -13,7 +13,6 @@ def get_column(obj: Tuple[Any, Any, Optional[CommentToken], Any]):
 
 
 def align_comments(d, extra_indent=0):
-
     # Only process when it's a data structure -> dict or list
     is_dict = isinstance(d, dict)
     is_list = isinstance(d, list)
@@ -44,7 +43,7 @@ def align_comments(d, extra_indent=0):
                         c_lines[i] = indent_value * ' ' + _line
                 token.value = '\n'.join(c_lines)
 
-    for element in (d.values() if is_dict else d):
+    for element in d.values() if is_dict else d:
         align_comments(element, extra_indent=extra_indent)
     return None
 

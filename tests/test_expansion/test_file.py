@@ -7,7 +7,7 @@ from easyconfig.expansion.location import ExpansionLocation, log
 
 
 @pytest.mark.parametrize(
-    'txt', (pytest.param('c:/path/file', id='p1'), pytest.param('//server/share/path/file', id='p2'))
+    'txt', [pytest.param('c:/path/file', id='p1'), pytest.param('//server/share/path/file', id='p2')]
 )
 def test_is_path_win(txt: str):
     assert is_path(txt)
@@ -38,7 +38,9 @@ def test_parse_path():
 
     assert parse_path_key('c:/path/file:MY_DEFAULT:WITH:MORE') == ('c:/path/file', 'MY_DEFAULT:WITH:MORE')
     assert parse_path_key('//server/share/path/file:MY_DEFAULT:WITH:MORE') == (
-        '//server/share/path/file', 'MY_DEFAULT:WITH:MORE')
+        '//server/share/path/file',
+        'MY_DEFAULT:WITH:MORE',
+    )
     assert parse_path_key('/asdf:MY_DEFAULT:WITH:MORE') == ('/asdf', 'MY_DEFAULT:WITH:MORE')
 
 
@@ -60,7 +62,7 @@ def test_read_file_existing(caplog, tmp_path):
 
 def test_read_file_missing(caplog):
     caplog.set_level(logging.DEBUG)
-    loc = ExpansionLocation(loc=('key_1', ), stack=())
+    loc = ExpansionLocation(loc=('key_1',), stack=())
 
     assert read_file_contents('/does/not/exist', loc=loc) == ('/does/not/exist', None)
     [[log_name, log_lvl, log_msg]] = caplog.record_tuples

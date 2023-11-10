@@ -10,17 +10,20 @@
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
-import os
 import sys
+from pathlib import Path
+
+src_folder = Path(__file__).parent.with_name('src')
+assert src_folder.is_dir()
 
 # required for autodoc
-sys.path.insert(0, os.path.join(os.path.abspath('..'), 'src'))
+sys.path.insert(0, str(src_folder))
 
 import easyconfig  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 project = 'easyconfig'
-copyright = '2022, spacemanspiff2007'
+copyright = '2023, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The full version, including alpha/beta/rc tags

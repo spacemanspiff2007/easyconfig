@@ -1,27 +1,28 @@
+from __future__ import annotations
+
 from io import StringIO
 from pathlib import Path
-from typing import Optional, Tuple, Union
-
-from pydantic import BaseModel
-from typing_extensions import Self
-
-from easyconfig.__const__ import MISSING, MISSING_TYPE
-from easyconfig.expansion import expand_obj
-from easyconfig.yaml import cmap_from_model, CommentedMap, write_aligned_yaml, yaml_rt
+from typing import TYPE_CHECKING
 
 from ..errors import FileDefaultsNotSetError
 from .object_config import ConfigObj
+from easyconfig.__const__ import MISSING, MISSING_TYPE
+from easyconfig.expansion import expand_obj
+from easyconfig.yaml import CommentedMap, cmap_from_model, write_aligned_yaml, yaml_rt
+
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+    from typing_extensions import Self
 
 
 class AppConfig(ConfigObj):
-    def __init__(self, model: BaseModel, path: Tuple[str, ...] = ('__root__',),
-                 parent: Union[MISSING_TYPE, Self] = MISSING):
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',), parent: MISSING_TYPE | Self = MISSING):
         super().__init__(model, path, parent)
 
-        self._file_defaults: Optional[BaseModel] = None
-        self._file_path: Optional[Path] = None
+        self._file_defaults: BaseModel | None = None
+        self._file_path: Path | None = None
 
-    def set_file_path(self, path: Union[Path, str]):
+    def set_file_path(self, path: Path | str):
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.
 
@@ -30,7 +31,8 @@ class AppConfig(ConfigObj):
         if isinstance(path, str):
             path = Path(path)
         if not isinstance(path, Path):
-            raise ValueError(f'Path to configuration file not of type Path: {path} ({type(path)})')
+            msg = f'Path to configuration file not of type Path: {path} ({type(path)})'
+            raise TypeError(msg)
 
         self._file_path = path.resolve()
         if not self._file_path.suffix:
@@ -52,7 +54,7 @@ class AppConfig(ConfigObj):
         self._set_values(model_obj)
         return self
 
-    def load_config_file(self, path: Union[Path, str] = None, expansion: bool = True):
+    def load_config_file(self, path: Path | str | None = None, expansion: bool = True):
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
         :param path: Path to file

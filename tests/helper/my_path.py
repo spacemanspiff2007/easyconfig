@@ -39,7 +39,7 @@ class Path(_path_type):
     def get_value(self) -> str:
         return self.contents.getvalue()
 
-    def open(self, *args, mode='r', **kwargs) -> TextIOWrapper:
+    def open(self, *args, mode='r', **kwargs) -> TextIOWrapper:  # noqa: A003
         if 'w' in mode and 'a' not in mode:
             self._create_buffer()
         return self.contents

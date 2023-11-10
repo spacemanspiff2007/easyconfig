@@ -3,4 +3,7 @@
 
 # testing dependencies
 pytest     >= 7.4, < 8
-pre-commit >= 3.3, < 4
+pre-commit >= 3.5, < 4
+
+# linter
+ruff >= 0.1.5, < 0.2

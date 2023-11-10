@@ -1,4 +1,4 @@
-from unittest.mock import call, Mock
+from unittest.mock import Mock, call
 
 from pydantic import BaseModel
 
@@ -7,7 +7,6 @@ from easyconfig.models import ConfigMixin
 
 
 def test_sub_name():
-
     class SimpleModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -22,7 +21,6 @@ def test_sub_name():
 
 
 def test_sub_simple():
-
     class SimpleModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -42,7 +40,6 @@ def test_sub_simple():
 
 
 def test_sub_sub_no_propagate():
-
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -75,7 +72,6 @@ def test_sub_sub_no_propagate():
 
 
 def test_sub_sub_propagate():
-
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6

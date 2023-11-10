@@ -23,7 +23,7 @@ def test_read_env_existing(envs: dict):
 
 def test_read_file_missing(caplog, envs):
     caplog.set_level(logging.DEBUG)
-    loc = ExpansionLocation(loc=('key_1', ), stack=())
+    loc = ExpansionLocation(loc=('key_1',), stack=())
 
     assert read_env_var('DOES_NOT_EXIST', loc=loc) == ('DOES_NOT_EXIST', None)
     [[log_name, log_lvl, log_msg]] = caplog.record_tuples

@@ -1,3 +1,5 @@
+# ruff: noqa: RUF012, INP001
+
 from enum import Enum
 from typing import List
 
@@ -65,7 +67,6 @@ def test_extra_kwargs():
 
 
 def test_list_of_models():
-
     class MyEnum(str, Enum):
         A = 'aa'
 
@@ -77,4 +78,11 @@ def test_list_of_models():
     class EncapModel(EasyBaseModel):
         c: List[SimpleModel] = []
 
-    create_app_config(EncapModel(c=[SimpleModel(), SimpleModel(), ]))
+    create_app_config(
+        EncapModel(
+            c=[
+                SimpleModel(),
+                SimpleModel(),
+            ]
+        )
+    )

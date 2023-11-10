@@ -1,12 +1,14 @@
+# ruff: noqa: ISC002
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, ByteSize, Field
 
+from tests.helper import dump_yaml
+
 from easyconfig.__const__ import ARG_NAME_IN_FILE
 from easyconfig.yaml.from_model import cmap_from_model
-from tests.helper import dump_yaml
 
 
 def test_simple_model():
@@ -112,7 +114,6 @@ b: 3
 
 
 def test_multiline_comment():
-
     class SimpleModel(BaseModel):
         a: str = Field('value a', description='This is\nthe topmost\nvalue of the model')
         b: int = Field(3, description='\nThis is\nvalue b')
@@ -127,7 +128,6 @@ def test_multiline_comment():
 
 
 def test_alias_not_in_file():
-
     class MyEnum(str, Enum):
         A = 'aa'
 
