@@ -2,6 +2,7 @@ from io import StringIO, TextIOWrapper
 from pathlib import Path as _Path
 from typing import Optional
 
+
 _path_type = type(_Path())
 
 
@@ -39,7 +40,7 @@ class Path(_path_type):
     def get_value(self) -> str:
         return self.contents.getvalue()
 
-    def open(self, *args, mode='r', **kwargs) -> TextIOWrapper:  # noqa: A003
+    def open(self, *args, mode='r', **kwargs) -> TextIOWrapper:
         if 'w' in mode and 'a' not in mode:
             self._create_buffer()
         return self.contents

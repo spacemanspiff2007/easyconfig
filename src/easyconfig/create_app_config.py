@@ -7,6 +7,7 @@ from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING, MISSING_TYPE
 from easyconfig.config_objs.app_config import AppConfig, yaml_rt
 from easyconfig.errors import ExtraKwArgsNotAllowedError
 
+
 TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
 TYPE_DEFAULTS = Union[BaseModel, Dict[str, Any]]
 
@@ -37,7 +38,7 @@ def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
 
 
 def get_file_values(
-    model: TYPE_WRAPPED, file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING
+    model: BaseModel, file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING
 ) -> Optional[BaseModel]:
     # Implicit default
     if file_values is MISSING:

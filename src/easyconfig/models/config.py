@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Any, Callable
 
 from easyconfig.errors import FunctionCallNotAllowedError
 
+
 if TYPE_CHECKING:
     import easyconfig
     import easyconfig.config_objs

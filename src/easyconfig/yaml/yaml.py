@@ -1,5 +1,6 @@
 import ruamel.yaml  # type: ignore
 
+
 yaml_rt = ruamel.yaml.YAML(typ='rt')
 yaml_safe = ruamel.yaml.YAML(typ='safe')
 

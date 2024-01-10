@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from easyconfig.models.config import ConfigMixin
 
+
 if TYPE_CHECKING:
     from pathlib import Path
 

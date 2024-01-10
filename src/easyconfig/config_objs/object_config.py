@@ -8,6 +8,7 @@ from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs import ConfigObjSubscription, SubscriptionParent
 from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowedError
 
+
 if TYPE_CHECKING:
     from pydantic.fields import FieldInfo
 

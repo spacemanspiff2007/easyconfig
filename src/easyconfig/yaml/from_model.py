@@ -7,8 +7,6 @@ from pydantic import BaseModel
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap, CommentedSeq
 
-NoneType = type(None)
-
 
 def _get_yaml_value(obj, parent_model: BaseModel, *, skip_none=True, obj_name: str | None = None):
     if obj is None:

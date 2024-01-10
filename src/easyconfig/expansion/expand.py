@@ -6,6 +6,7 @@ from .load_file import is_path, read_file_contents
 from .load_var import read_env_var
 from .location import ExpansionLocation
 
+
 RE_REPLACE = re.compile(r'''
     (?<!\$)\$\{
         (?P<value>.*?[^$])?

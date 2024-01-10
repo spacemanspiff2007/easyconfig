@@ -9,7 +9,7 @@ HANDLER: Callable[[Exception], Any] = default_exception_handler
 
 
 def set_exception_handler(handler: Callable[[Exception], Any]):
-    global HANDLER
+    global HANDLER  # noqa: PLW0603
     HANDLER = handler
 
 

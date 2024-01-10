@@ -5,6 +5,7 @@ from dataclasses import dataclass
 
 from easyconfig.errors.errors import CyclicEnvironmentVariableReferenceError
 
+
 log = logging.getLogger('easyconfig.expansion')
 
 

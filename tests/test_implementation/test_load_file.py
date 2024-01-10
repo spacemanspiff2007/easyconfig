@@ -1,7 +1,6 @@
 import pytest
-from pydantic import BaseModel as PydanticBaseModel
-
 from helper import Path
+from pydantic import BaseModel as PydanticBaseModel
 
 from easyconfig import AppBaseModel, BaseModel
 from easyconfig.config_objs import AppConfig

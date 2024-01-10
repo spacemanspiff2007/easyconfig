@@ -13,17 +13,19 @@
 import sys
 from pathlib import Path
 
+
 src_folder = Path(__file__).parent.with_name('src')
 assert src_folder.is_dir()
 
 # required for autodoc
 sys.path.insert(0, str(src_folder))
 
-import easyconfig  # noqa: E402
+import easyconfig
+
 
 # -- Project information -----------------------------------------------------
 project = 'easyconfig'
-copyright = '2023, spacemanspiff2007'
+copyright = '2024, spacemanspiff2007'
 author = 'spacemanspiff2007'
 
 # The full version, including alpha/beta/rc tags
