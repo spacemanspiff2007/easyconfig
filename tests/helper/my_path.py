@@ -9,6 +9,7 @@ _path_type = type(_Path())
 
 class Path(_path_type):
     if version_info < (3, 12):
+
         _flavour = _path_type._flavour
 
         def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
@@ -33,6 +34,7 @@ class Path(_path_type):
             return super().__new__(cls, *args)
 
     else:
+
         def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
             super().__init__(*args)
             # Own Path implementation

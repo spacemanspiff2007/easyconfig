@@ -40,6 +40,9 @@ That way the users can have some guidance how to change the program behaviour.
 It's possible to use environment variable or files for expansion. Easyconfig will load all values
 
 # Changelog
+#### 0.3.2 (2024-01-10)
+- Updated CI and code linters
+
 #### 0.3.1 (2023-11-10)
 - Updated dependencies and code linters
 
