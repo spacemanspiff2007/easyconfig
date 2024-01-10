@@ -22,7 +22,7 @@ __version__ = load_version()
 print(f'Version: {__version__}')
 print('')
 
-# When we run tox tests we don't have these files available so we skip them
+# When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():
@@ -35,7 +35,7 @@ setup(
     author='spaceman_spiff',
     # author_email="",
     description='Easy application configuration with yaml files',
-    keywords=['yaml', 'configuration', 'pydantic', 'settings', 'config'],
+    keywords=['yaml', 'configuration', 'pydantic', 'settings', 'config', 'yml'],
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/spacemanspiff2007/easyconfig',
@@ -57,6 +57,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development :: Libraries',
     ],

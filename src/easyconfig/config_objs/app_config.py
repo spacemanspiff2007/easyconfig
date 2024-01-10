@@ -4,11 +4,12 @@ from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from ..errors import FileDefaultsNotSetError
-from .object_config import ConfigObj
 from easyconfig.__const__ import MISSING, MISSING_TYPE
+from easyconfig.config_objs.object_config import ConfigObj
+from easyconfig.errors import FileDefaultsNotSetError
 from easyconfig.expansion import expand_obj
 from easyconfig.yaml import CommentedMap, cmap_from_model, write_aligned_yaml, yaml_rt
+
 
 if TYPE_CHECKING:
     from pydantic import BaseModel

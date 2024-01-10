@@ -55,7 +55,7 @@ def remove_none(obj: Union[dict]):
             remove_none(value)
             if not value:
                 rem.append(index)
-        else:
+        else:   # noqa: PLR5501
             if value is None:
                 rem.append(index)
 

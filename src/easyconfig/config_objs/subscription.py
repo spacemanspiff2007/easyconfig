@@ -2,6 +2,7 @@ from typing import TYPE_CHECKING, Callable, Final, Optional
 
 from easyconfig.errors import SubscriptionAlreadyCanceledError
 
+
 if TYPE_CHECKING:
     import easyconfig
 

@@ -1,10 +1,8 @@
-# ruff: noqa: ISC002
 from datetime import datetime
 from enum import Enum
 from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, ByteSize, Field
-
 from tests.helper import dump_yaml
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE
