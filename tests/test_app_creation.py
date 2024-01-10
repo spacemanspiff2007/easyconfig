@@ -1,4 +1,4 @@
-# ruff: noqa: RUF012, INP001
+# ruff: noqa: RUF012
 
 from enum import Enum
 from typing import List

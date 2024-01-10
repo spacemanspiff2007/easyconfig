@@ -50,7 +50,7 @@ def get_file_values(
 
     # dict -> build models
     if isinstance(file_values, dict):
-        file_values = model.__class__.parse_obj(file_values)
+        file_values = model.model_validate(file_values)
 
     if file_values is not None and not isinstance(file_values, BaseModel):
         msg = f'Default must be None or an instance of {BaseModel.__class__.__name__}! Got {type(file_values)}'

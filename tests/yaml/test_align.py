@@ -10,7 +10,7 @@ def my_map():
     top = CommentedMap()
     top['sub_key1'] = data = CommentedMap()
 
-    # this is currently not supported but we should not crash if a user does this
+    # this is currently not supported, but we should not crash if a user does this
     top.yaml_set_comment_before_after_key('sub_key1', before='my description')
 
     data['a'] = 1

@@ -22,7 +22,7 @@ __version__ = load_version()
 print(f'Version: {__version__}')
 print('')
 
-# When we run tox tests we don't have these files available so we skip them
+# When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')
 long_description = ''
 if readme.is_file():
