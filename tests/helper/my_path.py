@@ -1,7 +1,8 @@
 from io import StringIO, TextIOWrapper
 from pathlib import Path as _Path
-from typing import Optional
 from sys import version_info
+from typing import Optional
+
 
 _path_type = type(_Path())
 
