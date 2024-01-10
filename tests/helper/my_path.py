@@ -34,7 +34,7 @@ class Path(_path_type):
 
     else:
         def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
-            super().__init__()
+            super().__init__(*args)
             # Own Path implementation
             self.does_exist: bool = does_exist
             self.contents = None
