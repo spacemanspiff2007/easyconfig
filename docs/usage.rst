@@ -77,11 +77,13 @@ Nested example with the convenience base classes from easyconfig.
     # ------------ hide: stop -------------
 
 
-Description and comments
+Default file generation
 --------------------------------------
 It's possible to specify a description through the pydantic ``Field``.
 The description will be created as a comment in the .yml file.
-Note that the comments will be aligned properly
+Note that the comments will be aligned properly.
+With the ``in_file`` argument it's possible to skip entries from appearing in the default file
+(e.g. for advanced settings). When added manually to the file these values will still be loaded as expected.
 
 .. exec_code::
     :language_output: yaml
@@ -94,6 +96,7 @@ Note that the comments will be aligned properly
     class MySimpleAppConfig(AppBaseModel):
         retries: int = Field(5, description='Amount of retries on error')
         url: str = Field('localhost', description='Url used for connection')
+        advanced: str = Field('something advanced', in_file=False)
         port: int = 443
 
 
