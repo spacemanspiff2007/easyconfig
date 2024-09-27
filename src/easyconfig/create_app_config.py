@@ -13,7 +13,7 @@ TYPE_DEFAULTS = Union[BaseModel, Dict[str, Any]]
 
 
 # noinspection PyProtectedMember
-def check_field_args(model: AppConfig, allowed: FrozenSet[str]):
+def check_field_args(model: AppConfig, allowed: frozenset[str]):
     """Check extra args of pydantic fields"""
 
     # Model fields
