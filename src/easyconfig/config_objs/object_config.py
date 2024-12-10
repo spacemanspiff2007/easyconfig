@@ -26,7 +26,7 @@ class ConfigObj:
         model: BaseModel,
         path: Tuple[str, ...] = ('__root__',),
         parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
-    ):
+    ) -> None:
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
@@ -145,7 +145,7 @@ class ConfigObj:
 
         return propagate
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._full_obj_path}>'
 
     # def __getattr__(self, item):

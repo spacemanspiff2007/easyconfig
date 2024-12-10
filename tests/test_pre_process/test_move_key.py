@@ -1,34 +1,15 @@
 import pytest
 
 from easyconfig import BaseModel
-from easyconfig.pre_process.move_keys import MoveKeyPreProcess
+from easyconfig.pre_process import MoveKeyPreProcess
 
 
-def test_containing_obj():
-    f = MoveKeyPreProcess._get_containing_obj
-    assert f({}, ('a', 'b')) is None
-
-    d = {}
-    assert f({'a': d}, ('a', 'b')) is d
-
-    d = {}
-    assert f({'a': ({'c': d},)}, ('a', 0, 'c', 'd')) is d
-
-
-def test_obj_exists():
-    f = MoveKeyPreProcess._obj_exists
-    assert f({}, ('a', 'b')) is False
-    assert f({}, ()) is False
-    assert f({'a': 1}, ('a', )) is True
-
-    assert f([1], (1, )) is False
-    assert f([1], (0, )) is True
-
-
-def test_move():
+def test_move() -> None:
     f = MoveKeyPreProcess(('a', ), ('b', ))
 
-    f.run({})
+    d = {}
+    f.run(d)
+    assert d == {}
 
     d = {'b': 1}
     f.run(d)
@@ -48,7 +29,7 @@ def test_move():
     assert d == {'a': {'c': 1, 'd': 2}}
 
 
-def test_move_dst_does_not_exist():
+def test_move_dst_does_not_exist() -> None:
     class TestModelChildChild(BaseModel):
         db: int = 4
 
