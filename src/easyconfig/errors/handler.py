@@ -1,4 +1,5 @@
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 
 def default_exception_handler(e: Exception):
@@ -9,7 +10,7 @@ HANDLER: Callable[[Exception], Any] = default_exception_handler
 
 
 def set_exception_handler(handler: Callable[[Exception], Any]) -> None:
-    global HANDLER  # noqa: PLW0603
+    global HANDLER
     HANDLER = handler
 
 

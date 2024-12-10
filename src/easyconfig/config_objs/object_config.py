@@ -1,7 +1,8 @@
 from __future__ import annotations
 
+from collections.abc import Callable
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Tuple, Union
+from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import BaseModel
 from typing_extensions import Self
@@ -24,22 +25,22 @@ NO_COPY = tuple(n for n, o in getmembers(AppConfigMixin) if should_be_copied(o))
 
 
 class ConfigObj:
-    def __init__(self, model: BaseModel, path: Tuple[str, ...] = ('__root__',),
-                 parent: Union[MISSING_TYPE, ConfigObj] = MISSING, **kwargs) -> None:
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> None:
         super().__init__(**kwargs)
 
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
         self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: Dict[str, FieldInfo] = model.model_fields
-        self._obj_model_private_attrs: List[str] = list(model.__private_attributes__.keys())
+        self._obj_model_fields: dict[str, FieldInfo] = model.model_fields
+        self._obj_model_private_attrs: list[str] = list(model.__private_attributes__.keys())
 
-        self._obj_keys: Tuple[str, ...] = ()
-        self._obj_values: Dict[str, Any] = {}
-        self._obj_children: Dict[str, Union[ConfigObj, Tuple[ConfigObj, ...]]] = {}
+        self._obj_keys: tuple[str, ...] = ()
+        self._obj_values: dict[str, Any] = {}
+        self._obj_children: dict[str, ConfigObj | tuple[ConfigObj, ...]] = {}
 
-        self._obj_subscriptions: List[SubscriptionParent] = []
+        self._obj_subscriptions: list[SubscriptionParent] = []
 
         self._last_model: BaseModel = model
 
@@ -48,8 +49,8 @@ class ConfigObj:
         return '.'.join(self._obj_path)
 
     @classmethod
-    def from_model(cls, model: BaseModel, path: Tuple[str, ...] = ('__root__',),
-                   parent: Union[MISSING_TYPE, ConfigObj] = MISSING, **kwargs) -> Self:
+    def from_model(cls, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                   parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> Self:
 
         # Copy functions from the class definition to the child class
         functions = {}

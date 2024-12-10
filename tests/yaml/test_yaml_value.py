@@ -1,7 +1,6 @@
 # ruff: noqa: RUF012
 
 import datetime
-from typing import Dict, Set
 
 from pydantic import (
     AnyHttpUrl,
@@ -39,8 +38,8 @@ def test_built_in_types() -> None:
         is_int: int = 10
         is_str: str = 'asdf1!'
 
-        is_dict: Dict[str, int] = {'asdf': '10'}
-        is_set: Set[int] = {'10'}
+        is_dict: dict[str, int] = {'asdf': '10'}
+        is_set: set[int] = {'10'}
 
     m = ConstrainedModel()
 

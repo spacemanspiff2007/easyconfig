@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Callable, Final, Optional
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Final
 
 from easyconfig.errors import SubscriptionAlreadyCanceledError
 
@@ -15,8 +16,8 @@ class SubscriptionParent:
         propagate: bool = False,
         on_next: bool = False,
     ) -> None:
-        self.func: Optional[Callable] = func
-        self.cfg_obj: Optional['easyconfig.config_objs.HINT_CONFIG_OBJ'] = cfg_obj
+        self.func: Callable | None = func
+        self.cfg_obj: easyconfig.config_objs.HINT_CONFIG_OBJ | None = cfg_obj
 
         self.propagate: Final = propagate
         self.on_next: bool = on_next
@@ -43,7 +44,7 @@ class SubscriptionParent:
 
 class ConfigObjSubscription:
     def __init__(self, sub_obj: 'SubscriptionParent', target: str) -> None:
-        self._sub_obj: Optional['SubscriptionParent'] = sub_obj
+        self._sub_obj: SubscriptionParent | None = sub_obj
         self._sub_target: Final = target
 
     def cancel(self):

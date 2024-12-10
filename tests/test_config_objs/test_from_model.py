@@ -1,5 +1,3 @@
-from typing import Tuple
-
 from pydantic import BaseModel, PrivateAttr
 
 from easyconfig.config_objs import ConfigObj
@@ -48,7 +46,7 @@ def test_parse_submodel_tupels() -> None:
         a: int = 5
 
     class SimpleModel(BaseModel, ConfigMixin):
-        a: Tuple[SubModel, SubModel] = (SubModel(), SubModel(a=7))
+        a: tuple[SubModel, SubModel] = (SubModel(), SubModel(a=7))
         c: int = 3
 
     o = ConfigObj.from_model(SimpleModel())

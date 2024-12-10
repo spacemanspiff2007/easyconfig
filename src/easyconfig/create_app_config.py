@@ -1,5 +1,6 @@
+from collections.abc import Callable, Iterable
 from inspect import isfunction
-from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
+from typing import Any, TypeVar, Union
 
 from pydantic import BaseModel
 
@@ -9,7 +10,7 @@ from easyconfig.errors import ExtraKwArgsNotAllowedError
 
 
 TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
-TYPE_DEFAULTS = Union[BaseModel, Dict[str, Any]]
+TYPE_DEFAULTS = Union[BaseModel, dict[str, Any]]
 
 
 # noinspection PyProtectedMember
@@ -38,8 +39,8 @@ def check_field_args(model: AppConfig, allowed: frozenset[str]):
 
 
 def get_file_values(
-    model: BaseModel, file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING
-) -> Optional[BaseModel]:
+    model: BaseModel, file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING
+) -> BaseModel | None:
     # Implicit default
     if file_values is MISSING:
         file_values = model
@@ -61,9 +62,9 @@ def get_file_values(
 
 def create_app_config(
     model: TYPE_WRAPPED,
-    file_values: Union[MISSING_TYPE, None, TYPE_DEFAULTS, Callable[[], TYPE_DEFAULTS]] = MISSING,
+    file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING,
     validate_file_values=True,
-    check_field_extra_args: Optional[Iterable[str]] = (ARG_NAME_IN_FILE,),
+    check_field_extra_args: Iterable[str] | None = (ARG_NAME_IN_FILE,),
 ) -> TYPE_WRAPPED:
 
     file_defaults = get_file_values(model, file_values)

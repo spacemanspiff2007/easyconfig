@@ -1,7 +1,6 @@
 # ruff: noqa: RUF012
 
 from enum import Enum
-from typing import List
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
@@ -90,7 +89,7 @@ def test_list_of_models() -> None:
         c: MyEnum = MyEnum.A
 
     class EncapModel(EasyBaseModel):
-        c: List[SimpleModel] = []
+        c: list[SimpleModel] = []
 
     create_app_config(
         EncapModel(

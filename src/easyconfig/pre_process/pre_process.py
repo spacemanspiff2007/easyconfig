@@ -1,4 +1,5 @@
-from typing import Any, Callable, Final, MutableMapping, MutableSequence, TypeAlias
+from collections.abc import Callable, MutableMapping, MutableSequence
+from typing import Any, Final, TypeAlias
 
 from pydantic import BaseModel
 from typing_extensions import Self, override

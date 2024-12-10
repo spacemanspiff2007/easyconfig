@@ -1,5 +1,3 @@
-from typing import List
-
 from pydantic import BaseModel, Field, PrivateAttr
 from pydantic.fields import FieldInfo
 
@@ -22,7 +20,7 @@ class MyModel(BaseModel):
 class UserModel(MyModel):
     val_int: int
     val_str: str = 'test'
-    val_f: List[str] = Field(description='This key does this')
+    val_f: list[str] = Field(description='This key does this')
 
 
 def test_get_model_desc() -> None:

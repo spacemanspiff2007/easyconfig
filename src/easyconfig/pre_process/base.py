@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Final, MutableMapping, MutableSequence, TypeVar
-
-from typing_extensions import NewType
+from collections.abc import Callable, MutableMapping, MutableSequence
+from typing import TYPE_CHECKING, Any, Final, NewType, TypeVar
 
 from easyconfig.yaml import cmap_from_model
 

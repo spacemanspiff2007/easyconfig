@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Callable, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
@@ -10,7 +10,7 @@ from .base import PathAccessor, PreProcessBase
 
 
 if TYPE_CHECKING:
-    from collections.abc import MutableMapping, MutableSequence
+    from collections.abc import Callable, MutableMapping, MutableSequence
 
     from pydantic import BaseModel
 

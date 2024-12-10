@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, ByteSize, Field
 from tests.helper import dump_yaml
@@ -34,7 +33,7 @@ def test_simple_model_complex_types() -> None:
 
 def test_simple_model_skip_none() -> None:
     class SimpleModel(BaseModel):
-        a: Optional[int] = 5
+        a: int | None = 5
         b: int = 6
 
     assert dump_yaml(cmap_from_model(SimpleModel(a=None))) == 'b: 6\n'
@@ -135,7 +134,7 @@ def test_alias_not_in_file() -> None:
         c: MyEnum = MyEnum.A
 
     class EncapModel(BaseModel):
-        my_list: List[SimpleModel] = []
+        my_list: list[SimpleModel] = []
 
     assert dump_yaml(cmap_from_model(EncapModel(my_list=[SimpleModel(), SimpleModel(b=5), ]))) == \
         'my_list:\n' \
