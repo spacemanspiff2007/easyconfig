@@ -5,9 +5,10 @@ from pydantic import BaseModel
 from typing_extensions import Self, override
 
 from easyconfig.pre_process.base import PreProcessBase
+from .delete_entry import DeleteEntryPreProcess
 
-from .move_key import MoveKeyPreProcess
-from .rename_key import RenameKeyPreProcess
+from .move_entry import MoveEntryPreProcess
+from .rename_entry import RenameEntryPreProcess
 
 
 PATH_INPUT_TYPE: TypeAlias = tuple[str | int, ...] | list[str | int]
@@ -18,11 +19,13 @@ def get_path_tuple(obj: PATH_INPUT_TYPE) -> tuple[str | int, ...]:
         obj = tuple(obj)
 
     if not isinstance(obj, tuple):
-        raise TypeError(f'Must be tuple or list, is {type(obj)}')
+        msg = f'Must be tuple or list, is {type(obj)}'
+        raise TypeError(msg)
 
     for o in obj:
         if not isinstance(o, (str, int)):
-            raise TypeError(f'Must be str or int, is {type(obj)}')
+            msg = f'Must be str or int, is {type(obj)}'
+            raise TypeError(msg)
     return obj
 
 
@@ -32,10 +35,11 @@ class PreProcess(PreProcessBase):
         self._default: Final = default
         self._log: Callable[[str], Any] | None = None
 
-    def _add(self, obj: PreProcessBase):
+    def _add(self, obj: PreProcessBase) -> None:
         for existing in self._operations:
             if existing == obj:
-                raise ValueError(f'Operation {obj} already exists')
+                msg = f'Operation {obj} already exists'
+                raise ValueError(msg)
         self._operations += (obj,)
 
     def set_log_func(self, log_func: Callable[[str], Any] | None) -> Self:
@@ -46,20 +50,28 @@ class PreProcess(PreProcessBase):
     def move_entry(self, src: PATH_INPUT_TYPE, dst: PATH_INPUT_TYPE) -> Self:
         """Move an entry to a different location in the configuration
 
-        :param src: current path to entry
-        :param dst: new path to entry
+        :param src: current path to the entry
+        :param dst: new path to the entry
         :return:
         """
-        self._add(MoveKeyPreProcess(get_path_tuple(src), get_path_tuple(dst), defaults=self._default))
+        self._add(MoveEntryPreProcess(get_path_tuple(src), get_path_tuple(dst), defaults=self._default))
         return self
 
     def rename_entry(self, src: PATH_INPUT_TYPE, name: str) -> Self:
         """Rename an entry in the configuration
 
-        :param src: path to entry
+        :param src: path to the entry
         :param name: new name
         """
-        self._add(RenameKeyPreProcess(get_path_tuple(src), name))
+        self._add(RenameEntryPreProcess(get_path_tuple(src), name))
+        return self
+
+    def delete_entry(self, path: PATH_INPUT_TYPE) -> Self:
+        """Delete an entry in the configuration
+
+        :param path: path to the entry
+        """
+        self._add(DeleteEntryPreProcess(get_path_tuple(path)))
         return self
 
     @override

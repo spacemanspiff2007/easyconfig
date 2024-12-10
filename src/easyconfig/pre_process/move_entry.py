@@ -15,7 +15,7 @@ if TYPE_CHECKING:
     from pydantic import BaseModel
 
 
-class MoveKeyPreProcess(PreProcessBase):
+class MoveEntryPreProcess(PreProcessBase):
     def __init__(self, src: tuple[str | int, ...], dst: tuple[str | int, ...],
                  defaults: BaseModel | None = None) -> None:
         self.src: Final = PathAccessor(src)
@@ -30,7 +30,7 @@ class MoveKeyPreProcess(PreProcessBase):
                 raise ValueError(msg)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, MoveKeyPreProcess):
+        if not isinstance(other, MoveEntryPreProcess):
             return False
         return self.src == other.src and self.dst == other.dst
 
@@ -53,4 +53,4 @@ class MoveKeyPreProcess(PreProcessBase):
         self.dst.set_obj(dst_obj, self.src.pop_obj(src_obj))
 
         if log_func is not None:
-            log_func(f'Configuration "{self.src.path_name:s}" moved to "{self.dst.path_name:s}"')
+            log_func(f'Entry "{self.src.path_name:s}" moved to "{self.dst.path_name:s}"')

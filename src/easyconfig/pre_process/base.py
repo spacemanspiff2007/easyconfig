@@ -49,6 +49,9 @@ class PathAccessor:
         except (KeyError, IndexError):
             return None
 
+        if not isinstance(obj, (MutableSequence, MutableMapping)):
+            return None
+
         return obj
 
     def get_containing_obj_or_create_default(self, root: MutableSequence | MutableMapping,

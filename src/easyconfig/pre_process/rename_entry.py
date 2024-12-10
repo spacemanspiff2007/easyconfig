@@ -1,20 +1,22 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any, Final
+from typing import Any, Final, TYPE_CHECKING
 
 from typing_extensions import override
 
 from .base import PathAccessor, PreProcessBase
 
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
-class RenameKeyPreProcess(PreProcessBase):
+
+class RenameEntryPreProcess(PreProcessBase):
     def __init__(self, src: tuple[str | int, ...], new_name: str) -> None:
         self.src: Final = PathAccessor(src)
         self.dst: Final = PathAccessor(src[:-1] + (new_name,))
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, RenameKeyPreProcess):
+        if not isinstance(other, RenameEntryPreProcess):
             return False
         return self.src == other.src and self.dst == other.dst
 

@@ -1,11 +1,11 @@
 import pytest
 
 from easyconfig import BaseModel
-from easyconfig.pre_process import MoveKeyPreProcess
+from easyconfig.pre_process import MoveEntryPreProcess
 
 
 def test_move() -> None:
-    f = MoveKeyPreProcess(('a', ), ('b', ))
+    f = MoveEntryPreProcess(('a',), ('b',))
 
     d = {}
     f.run(d)
@@ -23,10 +23,12 @@ def test_move() -> None:
     f.run(d)
     assert d == {'b': {'c': 1}}
 
-    f = MoveKeyPreProcess(('b', ), ('a', 'd'))
+    msg = []
+    f = MoveEntryPreProcess(('b',), ('a', 'd'))
     d = {'a': {'c': 1}, 'b': 2}
-    f.run(d)
+    f.run(d, msg.append)
     assert d == {'a': {'c': 1, 'd': 2}}
+    assert msg == ['Entry "b" moved to "a.d"']
 
 
 def test_move_dst_does_not_exist() -> None:
@@ -40,15 +42,15 @@ def test_move_dst_does_not_exist() -> None:
     class TestModel(BaseModel):
         a: TestModelChild = TestModelChild()
 
-    f = MoveKeyPreProcess(('z', ), ('a', 'b'), defaults=TestModel())
+    f = MoveEntryPreProcess(('z',), ('a', 'b'), defaults=TestModel())
     d = {'z': 2}
     f.run(d)
     assert d == {'a': {'b': 2}}
 
     with pytest.raises(ValueError) as e:
-        MoveKeyPreProcess(('z', ), ('b', 'b', 'b'), defaults=TestModel())
+        MoveEntryPreProcess(('z',), ('b', 'b', 'b'), defaults=TestModel())
     assert str(e.value) == 'Path "b.b" does not exist in default'
 
     with pytest.raises(ValueError) as e:
-        MoveKeyPreProcess(('z', ), ('a', 'd', 'b'), defaults=TestModel())
+        MoveEntryPreProcess(('z',), ('a', 'd', 'b'), defaults=TestModel())
     assert str(e.value) == 'Path "a.d" does not exist in default'

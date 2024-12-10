@@ -128,7 +128,7 @@ yaml file
 
 .. exec_code::
     :language_output: yaml
-    :hide_code:
+    :hide:
 
     a = """
     env_var: "${MY_USER}"
@@ -148,7 +148,7 @@ yaml file
 
 .. exec_code::
     :language_output: yaml
-    :hide_code:
+    :hide:
     :caption_output: After expansion
 
 
@@ -225,3 +225,46 @@ This is especially useful feature if the application allows dynamic reloading of
     # This will trigger the callback
     CONFIG.load_config_file('/my/configuration/file.yml')
     # ------------ skip: stop -------------
+
+
+
+Preprocessing
+--------------------------------------
+With preprocessing it's possible to introduce changes in a non-breaking way
+
+
+.. exec_code::
+    :language_output: yaml
+
+    from pydantic import Field
+    from easyconfig import AppBaseModel, BaseModel, create_app_config
+
+
+    class HttpConfig(BaseModel):
+        url: str = 'localhost'
+        port: int = 443
+        retries: int = 3
+        timeout: int = 0
+
+
+    class MySimpleAppConfig(AppBaseModel):
+        http: HttpConfig = HttpConfig()
+
+
+    CONFIG = create_app_config(MySimpleAppConfig())
+
+    # Setup preprocessing, these are the migration steps from the old format
+    preprocess = CONFIG.load_preprocess
+    preprocess.rename_entry(['server'], 'http')
+    preprocess.move_entry(['wait time'], ['http', 'timeout'])
+    preprocess.set_log_func(print)  # This should normally be logger.info or logger.debug
+
+    # Load some old legacy format where http was still named server
+    CONFIG.load_config_dict({
+        'server': {     # this entry will be renamed to http
+            'retries': 5
+        },
+        'wait time': 10 # this entry will be moved to http.timeout
+    })
+
+    print(f'timeout: {CONFIG.http.timeout}')
