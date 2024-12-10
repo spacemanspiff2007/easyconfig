@@ -11,7 +11,7 @@ from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetErro
 from easyconfig.models import BaseModel as EasyBaseModel
 
 
-def test_simple():
+def test_simple() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -22,7 +22,7 @@ def test_simple():
         create_app_config(SimpleModel(), {'aaa': 'asdf'})
 
 
-def test_default_yaml():
+def test_default_yaml() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -37,7 +37,7 @@ def test_default_yaml():
         a.generate_default_yaml()
 
 
-def test_callback_for_default():
+def test_callback_for_default() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -51,7 +51,7 @@ def test_callback_for_default():
     assert a._file_defaults.a == 999
 
 
-def test_extra_kwargs():
+def test_extra_kwargs() -> None:
     class SimpleModelOk(BaseModel):
         a: int = Field(5, alias='aaa', in_file=False)
 
@@ -66,7 +66,7 @@ def test_extra_kwargs():
     assert str(e.value) == 'Extra kwargs for field "a" of SimpleModelErr are not allowed: in__file'
 
 
-def test_list_of_models():
+def test_list_of_models() -> None:
     class MyEnum(str, Enum):
         A = 'aa'
 

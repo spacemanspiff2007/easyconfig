@@ -48,7 +48,7 @@ def align_comments(d, extra_indent=0):
     return None
 
 
-def remove_none(obj: Union[dict]):
+def remove_none(obj: Union[dict]) -> None:
     rem = []
     for index, value in obj.items():
         if isinstance(value, dict):

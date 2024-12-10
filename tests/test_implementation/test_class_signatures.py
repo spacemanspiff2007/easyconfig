@@ -15,7 +15,7 @@ from easyconfig.models import AppConfigMixin, ConfigMixin
         (ConfigObj, ConfigMixin),
     ],
 )
-def test_signatures_match(mixin_cls, impl_cls):
+def test_signatures_match(mixin_cls, impl_cls) -> None:
     """Ensure that the mixin and the implementation have the same signatures"""
 
     for name, value in inspect.getmembers(mixin_cls):

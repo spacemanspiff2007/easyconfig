@@ -5,7 +5,7 @@ from typing import Final, Literal
 class _MissingType(Enum):
     MISSING_OBJ = object()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return '<Missing>'
 
 

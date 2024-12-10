@@ -44,7 +44,7 @@ def my_map():
     return top
 
 
-def test_align(my_map: CommentedMap):
+def test_align(my_map: CommentedMap) -> None:
     buf = io.StringIO()
     write_aligned_yaml(my_map, buf, 1)
     file_contents = buf.getvalue()

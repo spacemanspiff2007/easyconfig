@@ -7,14 +7,14 @@ from pydantic.fields import FieldInfo
 class MyDataSet:
     asdf = 'a'
 
-    def __init__(self, parent):
+    def __init__(self, parent) -> None:
         self.parent = parent
 
 
 class MyModel(BaseModel):
     _my_data: MyDataSet = PrivateAttr()
 
-    def __init__(self, **data):
+    def __init__(self, **data) -> None:
         super().__init__(**data)
         self._my_data = MyDataSet(self)
 
@@ -25,7 +25,7 @@ class UserModel(MyModel):
     val_f: List[str] = Field(description='This key does this')
 
 
-def test_get_model_desc():
+def test_get_model_desc() -> None:
     assert list(UserModel.model_fields.keys()) == [
         'val_int',
         'val_str',
@@ -38,7 +38,7 @@ def test_get_model_desc():
     assert UserModel.model_fields['val_f'].description == 'This key does this'
 
 
-def test_mutate(capsys):
+def test_mutate(capsys) -> None:
     m = UserModel(val_int=1, val_f=['asdf'])
 
     assert isinstance(m, UserModel)
@@ -60,7 +60,7 @@ def test_mutate(capsys):
     assert captured.out == "val_int: 88\nval_str: test\nval_f: ['asdf']\n"
 
 
-def test_nested_models():
+def test_nested_models() -> None:
     class ChildModel(BaseModel):
         c_a: str = Field(3, description='desc c_a')
         c_b: int = Field(3, description='desc c_b')
@@ -76,7 +76,7 @@ def test_nested_models():
     assert 'b' in obj.model_fields
 
 
-def test_env_access():
+def test_env_access() -> None:
     class ChildModel(BaseModel):
         c_a: str = Field(3, description='desc c_a', env='my_env_var')
         c_b: int = Field(3, description='desc c_b')
@@ -90,7 +90,7 @@ def test_env_access():
     assert obj.b.model_fields['c_a'].json_schema_extra == {'env': 'my_env_var'}
 
 
-def test_private_attr():
+def test_private_attr() -> None:
     class SimpleModel(BaseModel):
         _priv2: int = PrivateAttr(default=3)
         _priv3: int = PrivateAttr()

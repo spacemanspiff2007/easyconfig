@@ -1,7 +1,7 @@
 from .my_path import Path
 
 
-def test_my_path():
+def test_my_path() -> None:
     # Test some path operations
     a = Path('a')
     b = a / 'c'

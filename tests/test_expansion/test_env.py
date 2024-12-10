@@ -4,7 +4,7 @@ from easyconfig.expansion.load_var import parse_env_key, read_env_var
 from easyconfig.expansion.location import ExpansionLocation, log
 
 
-def test_parse_env_key():
+def test_parse_env_key() -> None:
     assert parse_env_key('NAME') == ('NAME', None)
     assert parse_env_key('NAME:DEFAULT') == ('NAME', 'DEFAULT')
     assert parse_env_key('NAME:DEFAULT:MULTIPLE:COLON') == ('NAME', 'DEFAULT:MULTIPLE:COLON')
@@ -13,7 +13,7 @@ def test_parse_env_key():
     assert parse_env_key(':DEFAULT') == ('', 'DEFAULT')
 
 
-def test_read_env_existing(envs: dict):
+def test_read_env_existing(envs: dict) -> None:
     envs.update({'NAME': 'asdf'})
 
     loc = ExpansionLocation(loc=(), stack=())
@@ -21,7 +21,7 @@ def test_read_env_existing(envs: dict):
     assert read_env_var('NAME:DEFAULT', loc=loc) == ('NAME', 'asdf')
 
 
-def test_read_file_missing(caplog, envs):
+def test_read_file_missing(caplog, envs) -> None:
     caplog.set_level(logging.DEBUG)
     loc = ExpansionLocation(loc=('key_1',), stack=())
 

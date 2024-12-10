@@ -5,7 +5,7 @@ from easyconfig.config_objs import ConfigObj
 from easyconfig.errors import FunctionCallNotAllowedError
 
 
-def test__repr__():
+def test__repr__() -> None:
     class SimpleModel(BaseModel):
         a: int = 5
 
@@ -13,7 +13,7 @@ def test__repr__():
     assert repr(o) == '<ConfigObj __root__.child>'
 
 
-def test_forbidden_calls():
+def test_forbidden_calls() -> None:
     class SimpleModel(BaseModel):
         a: int = 5
 
@@ -34,13 +34,13 @@ def test_forbidden_calls():
     assert str(e.value) == 'Call "load_config_dict" or "load_config_file" on the app config instance!'
 
 
-def test_attr_access():
+def test_attr_access() -> None:
     test_list = []
 
     class SimpleModel(BaseModel):
         a: int = 5
 
-        def append(self):
+        def append(self) -> None:
             test_list.append(True)
 
     o = ConfigObj.from_model(SimpleModel())

@@ -2,6 +2,7 @@ from inspect import getmembers, isfunction
 from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Tuple, Type, TypeVar, Union
 
 from pydantic import BaseModel
+from typing_extensions import Self
 
 from easyconfig import AppConfigMixin
 from easyconfig.__const__ import MISSING, MISSING_TYPE
@@ -52,7 +53,7 @@ class ConfigObj:
         model: BaseModel,
         path: Tuple[str, ...] = ('__root__',),
         parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
-    ):
+    ) -> Self:
         # Copy functions from the class definition to the child class
         functions = {}
         for name, member in getmembers(model.__class__):

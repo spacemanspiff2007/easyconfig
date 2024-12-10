@@ -28,12 +28,12 @@ class BaseModel(_BaseModel):
     model_config = ConfigDict(validate_assignment=True, validate_default=True, extra='forbid')
 
 
-def cmp_value(obj, target):
+def cmp_value(obj, target) -> None:
     assert obj == target
     assert type(obj) is type(target)
 
 
-def test_built_in_types():
+def test_built_in_types() -> None:
     class ConstrainedModel(BaseModel):
         is_bool: bool = True
         is_int: int = 10
@@ -52,7 +52,7 @@ def test_built_in_types():
     cmp_value(_get_yaml_value(m.is_set, m), CommentedSeq([10]))
 
 
-def test_constrained_types():
+def test_constrained_types() -> None:
     class ConstrainedModel(BaseModel):
         negative_float: NegativeFloat = -5
         negative_int: NegativeFloat = -3
@@ -81,7 +81,7 @@ def test_constrained_types():
     cmp_value(_get_yaml_value(m.con_date, m, obj_name='con_date'), '2023-01-02')  # yaml can't natively serialize dates
 
 
-def test_strict_types():
+def test_strict_types() -> None:
     class StrictModel(BaseModel):
         strict_bool_true: StrictBool = True
         strict_bool_false: StrictBool = False
@@ -104,7 +104,7 @@ def test_strict_types():
     cmp_value(_get_yaml_value(m.strict_bytes_empty, m), b'')
 
 
-def test_more_types():
+def test_more_types() -> None:
     class SimpleModel(BaseModel):
         size_raw: ByteSize = 100
         size_str: ByteSize = '10kb'

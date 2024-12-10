@@ -8,10 +8,10 @@ def default_exception_handler(e: Exception):
 HANDLER: Callable[[Exception], Any] = default_exception_handler
 
 
-def set_exception_handler(handler: Callable[[Exception], Any]):
+def set_exception_handler(handler: Callable[[Exception], Any]) -> None:
     global HANDLER  # noqa: PLW0603
     HANDLER = handler
 
 
-def process_exception(e: Exception):
+def process_exception(e: Exception) -> None:
     HANDLER(e)

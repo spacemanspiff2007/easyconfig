@@ -14,7 +14,7 @@ class SubscriptionParent:
         cfg_obj: 'easyconfig.config_objs.HINT_CONFIG_OBJ',
         propagate: bool = False,
         on_next: bool = False,
-    ):
+    ) -> None:
         self.func: Optional[Callable] = func
         self.cfg_obj: Optional['easyconfig.config_objs.HINT_CONFIG_OBJ'] = cfg_obj
 
@@ -35,14 +35,14 @@ class SubscriptionParent:
         # don't propagate first load value
         return False
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.cfg_obj._obj_subscriptions.remove(self)
         self.func = None
         self.cfg_obj = None
 
 
 class ConfigObjSubscription:
-    def __init__(self, sub_obj: 'SubscriptionParent', target: str):
+    def __init__(self, sub_obj: 'SubscriptionParent', target: str) -> None:
         self._sub_obj: Optional['SubscriptionParent'] = sub_obj
         self._sub_target: Final = target
 
@@ -56,5 +56,5 @@ class ConfigObjSubscription:
             raise SubscriptionAlreadyCanceledError(msg)
         parent.cancel()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'<{self.__class__.__name__} {self._sub_target}>'

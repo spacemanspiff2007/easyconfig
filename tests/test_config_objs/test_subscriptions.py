@@ -6,12 +6,12 @@ from easyconfig.config_objs import ConfigObj
 from easyconfig.models import ConfigMixin
 
 
-def test_sub_name():
+def test_sub_name() -> None:
     class SimpleModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
 
-    def my_func():
+    def my_func() -> None:
         pass
 
     o = ConfigObj.from_model(SimpleModel())
@@ -20,7 +20,7 @@ def test_sub_name():
     assert str(sub) == '<ConfigObjSubscription my_func @ __root__>'
 
 
-def test_sub_simple():
+def test_sub_simple() -> None:
     class SimpleModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -39,7 +39,7 @@ def test_sub_simple():
     m.assert_called_once_with()
 
 
-def test_sub_sub_no_propagate():
+def test_sub_sub_no_propagate() -> None:
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -71,7 +71,7 @@ def test_sub_sub_no_propagate():
     sub_parent.cancel()
 
 
-def test_sub_sub_propagate():
+def test_sub_sub_propagate() -> None:
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6

@@ -6,7 +6,7 @@ from easyconfig.config_objs import ConfigObj
 from easyconfig.models import ConfigMixin
 
 
-def test_parse_values():
+def test_parse_values() -> None:
     class SimpleModel(BaseModel):
         a: int = 5
         b: int = 6
@@ -16,7 +16,7 @@ def test_parse_values():
     assert o.b == 6
 
 
-def test_parse_submodels():
+def test_parse_submodels() -> None:
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
         b: int = 6
@@ -43,7 +43,7 @@ def test_parse_submodels():
     assert obj._obj_path == ('__root__', 'b')
 
 
-def test_parse_submodel_tupels():
+def test_parse_submodel_tupels() -> None:
     class SubModel(BaseModel, ConfigMixin):
         a: int = 5
 
@@ -65,7 +65,7 @@ def test_parse_submodel_tupels():
     assert obj._obj_path == ('__root__', 'a', '1')
 
 
-def test_func_call():
+def test_func_call() -> None:
     class SimpleModel(BaseModel):
         a: int = 5
         b: int = 6
@@ -84,13 +84,13 @@ def test_func_call():
     assert o.b == 2
 
 
-def test_private_attr():
+def test_private_attr() -> None:
     class SimpleModel(BaseModel):
         a: int = 1
         _b: int = PrivateAttr()
         _c: int = PrivateAttr(3)
 
-        def set_vars(self):
+        def set_vars(self) -> None:
             self._b = 99
 
     o = ConfigObj.from_model(SimpleModel())
