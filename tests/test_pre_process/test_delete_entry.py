@@ -1,6 +1,4 @@
-import pytest
 
-from easyconfig import BaseModel
 from easyconfig.pre_process import DeleteEntryPreProcess
 
 
@@ -52,4 +50,3 @@ def test_delete_nested() -> None:
     d = {'a': {'c': 1}}
     f.run(d)
     assert d == {'a': {'c': 1}}
-
