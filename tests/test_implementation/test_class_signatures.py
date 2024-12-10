@@ -23,6 +23,15 @@ def test_signatures_match(mixin_cls, impl_cls) -> None:
             continue
         impl = getattr(impl_cls, name)
 
+        if isinstance(value, property):
+            assert value.fset is None
+            assert value.fdel is None
+            value = value.fget
+        if isinstance(impl, property):
+            assert impl.fset is None
+            assert impl.fdel is None
+            impl = impl.fget
+
         target_spec = inspect.getfullargspec(value)
         current_spec = inspect.getfullargspec(impl)
 

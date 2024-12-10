@@ -17,7 +17,7 @@ RE_REPLACE = re.compile(r'''
 RE_ESCAPED = re.compile(RE_REPLACE.pattern.replace(r'(?<!\$)', r'\$'), re.VERBOSE)
 
 
-def read_value(key: str, /, full_match: bool, loc: ExpansionLocation) -> tuple[str, str]:
+def read_value(key: str, /, loc: ExpansionLocation) -> tuple[str, str]:
     if is_path(key):
         name, value = read_file_contents(key, loc)
     else:
@@ -40,12 +40,11 @@ def expand_text(text: str, /, loc: ExpansionLocation):
     while m := RE_REPLACE.search(text, pos_start):
         m_start = m.start()
         m_end = m.end()
-        full_match = m_start == 0 and m_end == len(text)
 
         raw_value = m.group('value')
         raw_value = raw_value.replace('$}', '}')
 
-        name, value = read_value(raw_value, full_match, loc=loc)
+        name, value = read_value(raw_value, loc=loc)
 
         # value is valid
         value = expand_text(value, loc=loc.expand_value(name))

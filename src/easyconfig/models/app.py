@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from typing_extensions import Self
 
 from easyconfig.models.config import ConfigMixin
+from easyconfig.pre_process import PreProcess
 
 
 if TYPE_CHECKING:
@@ -12,6 +13,11 @@ if TYPE_CHECKING:
 
 
 class AppConfigMixin(ConfigMixin):
+
+    @property
+    def load_preprocess(self) -> PreProcess:
+        """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
+
     def set_file_path(self, path: Path | str) -> None:
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.

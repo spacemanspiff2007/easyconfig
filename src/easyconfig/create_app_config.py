@@ -65,8 +65,9 @@ def create_app_config(
     validate_file_values=True,
     check_field_extra_args: Optional[Iterable[str]] = (ARG_NAME_IN_FILE,),
 ) -> TYPE_WRAPPED:
-    app_cfg = AppConfig.from_model(model)
-    app_cfg._file_defaults = get_file_values(model, file_values)
+
+    file_defaults = get_file_values(model, file_values)
+    app_cfg = AppConfig.from_model(model, file_defaults=file_defaults)
 
     # ensure that the extra args have no typos
     if check_field_extra_args is not None:

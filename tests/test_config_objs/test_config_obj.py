@@ -43,7 +43,13 @@ def test_attr_access() -> None:
         def append(self) -> None:
             test_list.append(True)
 
-    o = ConfigObj.from_model(SimpleModel())
-    o.append()
+        @property
+        def value_10(self) -> int:
+            return 10
 
+    o = ConfigObj.from_model(SimpleModel())
+
+    o.append()
     assert test_list == [True]
+
+    assert o.value_10 == 10

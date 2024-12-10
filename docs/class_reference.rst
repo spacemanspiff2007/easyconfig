@@ -22,3 +22,9 @@ Subscription
 
 .. autoclass:: easyconfig.config_objs.ConfigObjSubscription
    :members:
+
+Subscription
+======================================
+
+.. autoclass:: easyconfig.pre_process.PreProcess
+   :members:

@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs.object_config import ConfigObj
 from easyconfig.errors import FileDefaultsNotSetError
 from easyconfig.expansion import expand_obj
+from easyconfig.pre_process import PreProcess
 from easyconfig.yaml import CommentedMap, cmap_from_model, write_aligned_yaml, yaml_rt
 
 
@@ -17,11 +18,18 @@ if TYPE_CHECKING:
 
 
 class AppConfig(ConfigObj):
-    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',), parent: MISSING_TYPE | Self = MISSING) -> None:
-        super().__init__(model, path, parent)
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs) -> None:
+        super().__init__(model, path, parent, **kwargs)
 
-        self._file_defaults: BaseModel | None = None
+        self._file_defaults: Final = file_defaults
+        self._preprocess: Final = PreProcess(self._file_defaults)
         self._file_path: Path | None = None
+
+    @property
+    def load_preprocess(self) -> PreProcess:
+        """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
+        return self._preprocess
 
     def set_file_path(self, path: Path | str) -> None:
         """Set the path to the configuration file.
@@ -45,6 +53,8 @@ class AppConfig(ConfigObj):
         :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
+        self._preprocess.run(cfg)
+
         if expansion:
             expand_obj(cfg)
 

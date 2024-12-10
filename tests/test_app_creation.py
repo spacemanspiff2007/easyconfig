@@ -22,6 +22,20 @@ def test_simple() -> None:
         create_app_config(SimpleModel(), {'aaa': 'asdf'})
 
 
+def test_process() -> None:
+    class SimpleModel(BaseModel):
+        a: int = Field(5, alias='aaa')
+
+    msgs = []
+
+    a = create_app_config(SimpleModel(aaa=99))
+    a.load_preprocess.rename_entry(['zzz'], 'aaa').set_log_func(msgs.append)
+    a.load_config_dict({'zzz': 999})
+
+    assert a.a == 999
+    assert msgs == ['Entry "zzz" renamed to "aaa"']
+
+
 def test_default_yaml() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')

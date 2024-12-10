@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any, Final, MutableMapping, MutableSequence, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Final, MutableMapping, MutableSequence, TypeVar
 
 from typing_extensions import NewType
 
@@ -114,5 +114,8 @@ class PathAccessor:
 
 
 class PreProcessBase:
-    def run(self, obj: MutableSequence) -> None:
+    def run(self, obj: MutableSequence | MutableMapping, log_func: Callable[[str], Any] | None = None) -> None:
+        raise NotImplementedError()
+
+    def __eq__(self, other) -> bool:
         raise NotImplementedError()
