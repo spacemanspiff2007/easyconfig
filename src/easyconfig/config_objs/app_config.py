@@ -17,13 +17,13 @@ if TYPE_CHECKING:
 
 
 class AppConfig(ConfigObj):
-    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',), parent: MISSING_TYPE | Self = MISSING):
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',), parent: MISSING_TYPE | Self = MISSING) -> None:
         super().__init__(model, path, parent)
 
         self._file_defaults: BaseModel | None = None
         self._file_path: Path | None = None
 
-    def set_file_path(self, path: Path | str):
+    def set_file_path(self, path: Path | str) -> None:
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.
 
@@ -39,7 +39,7 @@ class AppConfig(ConfigObj):
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict, /, expansion: bool = True):
+    def load_config_dict(self, cfg: dict, /, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
         :param cfg: config dict which will be loaded
@@ -55,7 +55,7 @@ class AppConfig(ConfigObj):
         self._set_values(model_obj)
         return self
 
-    def load_config_file(self, path: Path | str | None = None, expansion: bool = True):
+    def load_config_file(self, path: Path | str | None = None, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
         :param path: Path to file

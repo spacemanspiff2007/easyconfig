@@ -1,5 +1,5 @@
 from inspect import isfunction
-from typing import Any, Callable, Dict, FrozenSet, Iterable, Optional, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, Optional, TypeVar, Union
 
 from pydantic import BaseModel
 

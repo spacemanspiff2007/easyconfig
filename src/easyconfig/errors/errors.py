@@ -19,7 +19,7 @@ class FileDefaultsNotSetError(EasyConfigError):
 
 
 class FunctionCallNotAllowedError(EasyConfigError):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__('Call "load_config_dict" or "load_config_file" on the app config instance!')
 
 
