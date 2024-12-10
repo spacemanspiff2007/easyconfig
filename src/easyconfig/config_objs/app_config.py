@@ -2,12 +2,13 @@ from __future__ import annotations
 
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Final
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs.object_config import ConfigObj
 from easyconfig.errors import FileDefaultsNotSetError
 from easyconfig.expansion import expand_obj
+from easyconfig.pre_process import PreProcess
 from easyconfig.yaml import CommentedMap, cmap_from_model, write_aligned_yaml, yaml_rt
 
 
@@ -17,13 +18,29 @@ if TYPE_CHECKING:
 
 
 class AppConfig(ConfigObj):
-    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',), parent: MISSING_TYPE | Self = MISSING):
-        super().__init__(model, path, parent)
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs) -> None:
+        super().__init__(model, path, parent, **kwargs)
 
-        self._file_defaults: BaseModel | None = None
+        self._file_defaults: Final = file_defaults
+        self._preprocess: Final = PreProcess(self._file_defaults)
         self._file_path: Path | None = None
 
-    def set_file_path(self, path: Path | str):
+    @property
+    def loaded_file_path(self) -> Path:
+        """Path to the loaded configuration file"""
+
+        if self._file_path is None:
+            msg = 'No file loaded'
+            raise ValueError(msg)
+        return self._file_path
+
+    @property
+    def load_preprocess(self) -> PreProcess:
+        """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
+        return self._preprocess
+
+    def set_file_path(self, path: Path | str) -> None:
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.
 
@@ -39,12 +56,14 @@ class AppConfig(ConfigObj):
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict, /, expansion: bool = True):
+    def load_config_dict(self, cfg: dict, /, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
         :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
+        self._preprocess.run(cfg)
+
         if expansion:
             expand_obj(cfg)
 
@@ -55,7 +74,7 @@ class AppConfig(ConfigObj):
         self._set_values(model_obj)
         return self
 
-    def load_config_file(self, path: Path | str | None = None, expansion: bool = True):
+    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
         :param path: Path to file

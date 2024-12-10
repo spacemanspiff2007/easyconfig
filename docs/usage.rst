@@ -77,11 +77,13 @@ Nested example with the convenience base classes from easyconfig.
     # ------------ hide: stop -------------
 
 
-Description and comments
+Default file generation
 --------------------------------------
 It's possible to specify a description through the pydantic ``Field``.
 The description will be created as a comment in the .yml file.
-Note that the comments will be aligned properly
+Note that the comments will be aligned properly.
+With the ``in_file`` argument it's possible to skip entries from appearing in the default file
+(e.g. for advanced settings). When added manually to the file these values will still be loaded as expected.
 
 .. exec_code::
     :language_output: yaml
@@ -94,6 +96,7 @@ Note that the comments will be aligned properly
     class MySimpleAppConfig(AppBaseModel):
         retries: int = Field(5, description='Amount of retries on error')
         url: str = Field('localhost', description='Url used for connection')
+        advanced: str = Field('something advanced', in_file=False)
         port: int = 443
 
 
@@ -125,7 +128,7 @@ yaml file
 
 .. exec_code::
     :language_output: yaml
-    :hide_code:
+    :hide:
 
     a = """
     env_var: "${MY_USER}"
@@ -145,7 +148,7 @@ yaml file
 
 .. exec_code::
     :language_output: yaml
-    :hide_code:
+    :hide:
     :caption_output: After expansion
 
 
@@ -222,3 +225,46 @@ This is especially useful feature if the application allows dynamic reloading of
     # This will trigger the callback
     CONFIG.load_config_file('/my/configuration/file.yml')
     # ------------ skip: stop -------------
+
+
+
+Preprocessing
+--------------------------------------
+With preprocessing it's possible to introduce changes in a non-breaking way
+
+
+.. exec_code::
+    :language_output: yaml
+
+    from pydantic import Field
+    from easyconfig import AppBaseModel, BaseModel, create_app_config
+
+
+    class HttpConfig(BaseModel):
+        url: str = 'localhost'
+        port: int = 443
+        retries: int = 3
+        timeout: int = 0
+
+
+    class MySimpleAppConfig(AppBaseModel):
+        http: HttpConfig = HttpConfig()
+
+
+    CONFIG = create_app_config(MySimpleAppConfig())
+
+    # Setup preprocessing, these are the migration steps from the old format
+    preprocess = CONFIG.load_preprocess
+    preprocess.rename_entry(['server'], 'http')
+    preprocess.move_entry(['wait time'], ['http', 'timeout'])
+    preprocess.set_log_func(print)  # This should normally be logger.info or logger.debug
+
+    # Load some old legacy format where http was still named server
+    CONFIG.load_config_dict({
+        'server': {     # this entry will be renamed to http
+            'retries': 5
+        },
+        'wait time': 10 # this entry will be moved to http.timeout
+    })
+
+    print(f'timeout: {CONFIG.http.timeout}')

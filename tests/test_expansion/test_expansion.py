@@ -5,7 +5,7 @@ from easyconfig.expansion.expand import RE_REPLACE, expand_obj, expand_text
 from easyconfig.expansion.location import ExpansionLocation
 
 
-def test_regex():
+def test_regex() -> None:
     assert RE_REPLACE.fullmatch('${}')
     assert RE_REPLACE.fullmatch('${asdf}')
 
@@ -16,7 +16,7 @@ def test_regex():
     assert RE_REPLACE.search('${${}').group(1) == '${'
 
 
-def test_load_env(envs: dict):
+def test_load_env(envs: dict) -> None:
     envs.update(
         {'NAME': 'asdf', 'RECURSE': 'Name: ${NAME}', 'TEST_$_DOLLAR': 'DOLLAR_WORKS', 'TEST_}_CURLY': 'CURLY_WORKS'}
     )
@@ -44,7 +44,7 @@ def test_load_env(envs: dict):
     assert expand_text('${TEST_$}_CURLY}', loc) == 'CURLY_WORKS'
 
 
-def test_env_cyclic_reference(envs: dict):
+def test_env_cyclic_reference(envs: dict) -> None:
     envs.update({'NAME': '${SELF}', 'SELF': 'Name: ${SELF}'})
 
     with pytest.raises(CyclicEnvironmentVariableReferenceError) as e:
@@ -53,7 +53,7 @@ def test_env_cyclic_reference(envs: dict):
     assert str(e.value) == 'Cyclic environment variable reference: NAME -> SELF -> SELF (at __root__.a)'
 
 
-def test_expansion(envs: dict):
+def test_expansion(envs: dict) -> None:
     envs.update({'NAME': 'ASDF'})
 
     obj = {'a': {'b': ['${NAME}']}, 'b': '${MISSING:DEFAULT}'}

@@ -9,7 +9,7 @@ from easyconfig.expansion.location import ExpansionLocation, log
 @pytest.mark.parametrize(
     'txt', [pytest.param('c:/path/file', id='p1'), pytest.param('//server/share/path/file', id='p2')]
 )
-def test_is_path_win(txt: str):
+def test_is_path_win(txt: str) -> None:
     assert is_path(txt)
     assert is_path(txt.upper())
 
@@ -18,7 +18,7 @@ def test_is_path_win(txt: str):
     assert is_path(txt.upper())
 
 
-def test_is_path():
+def test_is_path() -> None:
     # unix path
     assert is_path('/asdf')
     assert is_path('/asdf.txt')
@@ -27,7 +27,7 @@ def test_is_path():
     assert not is_path('asdf.txt')
 
 
-def test_parse_path():
+def test_parse_path() -> None:
     assert parse_path_key('c:/path/file') == ('c:/path/file', None)
     assert parse_path_key('//server/share/path/file') == ('//server/share/path/file', None)
     assert parse_path_key('/asdf') == ('/asdf', None)
@@ -44,7 +44,7 @@ def test_parse_path():
     assert parse_path_key('/asdf:MY_DEFAULT:WITH:MORE') == ('/asdf', 'MY_DEFAULT:WITH:MORE')
 
 
-def test_read_file_existing(caplog, tmp_path):
+def test_read_file_existing(caplog, tmp_path) -> None:
     caplog.set_level(logging.DEBUG)
     loc = ExpansionLocation(loc=(), stack=())
 
@@ -60,7 +60,7 @@ def test_read_file_existing(caplog, tmp_path):
     assert value == 'asdf asdf'
 
 
-def test_read_file_missing(caplog):
+def test_read_file_missing(caplog) -> None:
     caplog.set_level(logging.DEBUG)
     loc = ExpansionLocation(loc=('key_1',), stack=())
 

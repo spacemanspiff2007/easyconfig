@@ -1,7 +1,6 @@
 from io import StringIO, TextIOWrapper
 from pathlib import Path as _Path
 from sys import version_info
-from typing import Optional
 
 
 _path_type = type(_Path())
@@ -12,7 +11,7 @@ class Path(_path_type):
 
         _flavour = _path_type._flavour
 
-        def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
+        def __init__(self, *args, does_exist: bool = True, initial_value: str | None = None, **kwargs) -> None:
             super().__init__()
 
             if hasattr(Path, '_from_parts'):
@@ -35,14 +34,14 @@ class Path(_path_type):
 
     else:
 
-        def __init__(self, *args, does_exist: bool = True, initial_value: Optional[str] = None, **kwargs):
+        def __init__(self, *args, does_exist: bool = True, initial_value: str | None = None, **kwargs) -> None:
             super().__init__(*args)
             # Own Path implementation
             self.does_exist: bool = does_exist
             self.contents = None
             self._create_buffer(initial_value)
 
-    def _create_buffer(self, initial_value: Optional[str] = None):
+    def _create_buffer(self, initial_value: str | None = None) -> None:
         self.contents = StringIO(initial_value)
         self.contents.close = lambda: None
 

@@ -1,18 +1,17 @@
-import typing
 from pathlib import Path
 
 from setuptools import find_packages, setup
 
 
 def load_version() -> str:
-    version: typing.Dict[str, str] = {}
+    version: dict[str, str] = {}
     with open('src/easyconfig/__version__.py') as fp:
         exec(fp.read(), version)
     assert version['__version__'], version
     return version['__version__']
 
 
-def load_req() -> typing.List[str]:
+def load_req() -> list[str]:
     with open('requirements_setup.txt') as f:
         return f.readlines()
 
@@ -20,7 +19,7 @@ def load_req() -> typing.List[str]:
 __version__ = load_version()
 
 print(f'Version: {__version__}')
-print('')
+print()
 
 # When we run tox tests we don't have these files available, so we skip them
 readme = Path(__file__).with_name('readme.md')
@@ -46,18 +45,17 @@ setup(
     package_data={'easyconfig': ['py.typed']},
     packages=find_packages('src', exclude=['tests*']),
     install_requires=load_req(),
-    python_requires='>=3.8',
+    python_requires='>=3.10',
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: Apache Software License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.8',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
+        'Programming Language :: Python :: 3.13',
         'Programming Language :: Python :: 3 :: Only',
         'Topic :: Software Development :: Libraries',
     ],

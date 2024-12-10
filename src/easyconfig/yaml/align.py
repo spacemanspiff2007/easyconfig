@@ -1,12 +1,12 @@
 from io import StringIO
-from typing import Any, Optional, Tuple, Union
+from typing import Any
 
 from ruamel.yaml import CommentToken
 
 from easyconfig.yaml import yaml_rt
 
 
-def get_column(obj: Tuple[Any, Any, Optional[CommentToken], Any]):
+def get_column(obj: tuple[Any, Any, CommentToken | None, Any]):
     if (token := obj[2]) is None:
         return 0
     return token.column
@@ -48,7 +48,7 @@ def align_comments(d, extra_indent=0):
     return None
 
 
-def remove_none(obj: Union[dict]):
+def remove_none(obj: dict) -> None:
     rem = []
     for index, value in obj.items():
         if isinstance(value, dict):

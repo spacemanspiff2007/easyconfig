@@ -1,17 +1,18 @@
 # ruff: noqa: RUF012
 
 from enum import Enum
-from typing import List
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
 from easyconfig import create_app_config
+from easyconfig.config_objs import AppConfig, ConfigObj
 from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetError
+from easyconfig.models import AppBaseModel as EasyAppBaseModel
 from easyconfig.models import BaseModel as EasyBaseModel
 
 
-def test_simple():
+def test_simple() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -22,7 +23,21 @@ def test_simple():
         create_app_config(SimpleModel(), {'aaa': 'asdf'})
 
 
-def test_default_yaml():
+def test_process() -> None:
+    class SimpleModel(BaseModel):
+        a: int = Field(5, alias='aaa')
+
+    msgs = []
+
+    a = create_app_config(SimpleModel(aaa=99))
+    a.load_preprocess.rename_entry(['zzz'], 'aaa').set_log_func(msgs.append)
+    a.load_config_dict({'zzz': 999})
+
+    assert a.a == 999
+    assert msgs == ['Entry "zzz" renamed to "aaa"']
+
+
+def test_default_yaml() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -37,7 +52,7 @@ def test_default_yaml():
         a.generate_default_yaml()
 
 
-def test_callback_for_default():
+def test_callback_for_default() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
@@ -51,7 +66,7 @@ def test_callback_for_default():
     assert a._file_defaults.a == 999
 
 
-def test_extra_kwargs():
+def test_extra_kwargs() -> None:
     class SimpleModelOk(BaseModel):
         a: int = Field(5, alias='aaa', in_file=False)
 
@@ -66,7 +81,7 @@ def test_extra_kwargs():
     assert str(e.value) == 'Extra kwargs for field "a" of SimpleModelErr are not allowed: in__file'
 
 
-def test_list_of_models():
+def test_list_of_models() -> None:
     class MyEnum(str, Enum):
         A = 'aa'
 
@@ -76,7 +91,7 @@ def test_list_of_models():
         c: MyEnum = MyEnum.A
 
     class EncapModel(EasyBaseModel):
-        c: List[SimpleModel] = []
+        c: list[SimpleModel] = []
 
     create_app_config(
         EncapModel(
@@ -86,3 +101,21 @@ def test_list_of_models():
             ]
         )
     )
+
+
+def test_path() -> None:
+    class SimpleModel(EasyBaseModel):
+        z: str = 'asdf'
+
+    class ParentModel(EasyAppBaseModel):
+        b: SimpleModel = SimpleModel()
+
+    a = create_app_config(ParentModel())
+
+    assert isinstance(a, AppConfig)
+    assert isinstance(a.b, ConfigObj)
+
+    a._file_path = o = object()
+
+    assert a.loaded_file_path is o
+    assert a.b.loaded_file_path is o

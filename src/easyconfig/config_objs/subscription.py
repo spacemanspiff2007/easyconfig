@@ -1,4 +1,5 @@
-from typing import TYPE_CHECKING, Callable, Final, Optional
+from collections.abc import Callable
+from typing import TYPE_CHECKING, Final
 
 from easyconfig.errors import SubscriptionAlreadyCanceledError
 
@@ -14,9 +15,9 @@ class SubscriptionParent:
         cfg_obj: 'easyconfig.config_objs.HINT_CONFIG_OBJ',
         propagate: bool = False,
         on_next: bool = False,
-    ):
-        self.func: Optional[Callable] = func
-        self.cfg_obj: Optional['easyconfig.config_objs.HINT_CONFIG_OBJ'] = cfg_obj
+    ) -> None:
+        self.func: Callable | None = func
+        self.cfg_obj: easyconfig.config_objs.HINT_CONFIG_OBJ | None = cfg_obj
 
         self.propagate: Final = propagate
         self.on_next: bool = on_next
@@ -35,15 +36,15 @@ class SubscriptionParent:
         # don't propagate first load value
         return False
 
-    def cancel(self):
+    def cancel(self) -> None:
         self.cfg_obj._obj_subscriptions.remove(self)
         self.func = None
         self.cfg_obj = None
 
 
 class ConfigObjSubscription:
-    def __init__(self, sub_obj: 'SubscriptionParent', target: str):
-        self._sub_obj: Optional['SubscriptionParent'] = sub_obj
+    def __init__(self, sub_obj: 'SubscriptionParent', target: str) -> None:
+        self._sub_obj: SubscriptionParent | None = sub_obj
         self._sub_target: Final = target
 
     def cancel(self):
@@ -56,5 +57,5 @@ class ConfigObjSubscription:
             raise SubscriptionAlreadyCanceledError(msg)
         parent.cancel()
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f'<{self.__class__.__name__} {self._sub_target}>'

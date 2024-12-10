@@ -1,6 +1,5 @@
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
 
 from pydantic import AnyHttpUrl, BaseModel, ByteSize, Field
 from tests.helper import dump_yaml
@@ -9,7 +8,7 @@ from easyconfig.__const__ import ARG_NAME_IN_FILE
 from easyconfig.yaml.from_model import cmap_from_model
 
 
-def test_simple_model():
+def test_simple_model() -> None:
     class SimpleModel(BaseModel):
         a: int = 5
         b: int = 6
@@ -17,7 +16,7 @@ def test_simple_model():
     assert dump_yaml(cmap_from_model(SimpleModel())) == 'a: 5\nb: 6\n'
 
 
-def test_base_overrides():
+def test_base_overrides() -> None:
     class SimpleModel(BaseModel):
         size: ByteSize
         url: AnyHttpUrl = 'http://test.de'
@@ -25,22 +24,22 @@ def test_base_overrides():
     assert dump_yaml(cmap_from_model(SimpleModel(size=ByteSize(1024)))) == 'size: 1024\nurl: http://test.de\n'
 
 
-def test_simple_model_complex_types():
+def test_simple_model_complex_types() -> None:
     class SimpleModel(BaseModel):
         a: datetime = datetime(2000, 1, 1)
 
     assert dump_yaml(cmap_from_model(SimpleModel())) == "a: '2000-01-01T00:00:00'\n"
 
 
-def test_simple_model_skip_none():
+def test_simple_model_skip_none() -> None:
     class SimpleModel(BaseModel):
-        a: Optional[int] = 5
+        a: int | None = 5
         b: int = 6
 
     assert dump_yaml(cmap_from_model(SimpleModel(a=None))) == 'b: 6\n'
 
 
-def test_simple_model_alias():
+def test_simple_model_alias() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
         b: int = 6
@@ -48,7 +47,7 @@ def test_simple_model_alias():
     assert dump_yaml(cmap_from_model(SimpleModel())) == 'aaa: 5\nb: 6\n'
 
 
-def test_simple_model_description():
+def test_simple_model_description() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa', description='Key A')
         b: int = Field(6, description='Key b')
@@ -58,7 +57,7 @@ def test_simple_model_description():
         'b: 6 # Key b\n'
 
 
-def test_simple_model_skip_key():
+def test_simple_model_skip_key() -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa', description='Key A')
         b: int = Field(6, description='Key b', **{ARG_NAME_IN_FILE: False})
@@ -67,7 +66,7 @@ def test_simple_model_skip_key():
         'aaa: 5  # Key A\n'
 
 
-def test_sub_model():
+def test_sub_model() -> None:
     class SubModel(BaseModel):
         aa: int = 5
         ab: int = 6
@@ -83,7 +82,7 @@ b: 3
 '''
 
 
-def test_skip_sub_model():
+def test_skip_sub_model() -> None:
     class SubModel(BaseModel):
         aa: int = 5
         ab: int = 6
@@ -95,7 +94,7 @@ def test_skip_sub_model():
     assert dump_yaml(cmap_from_model(SimpleModel())) == 'b: 3\n'
 
 
-def test_sub_model_alias_description():
+def test_sub_model_alias_description() -> None:
     class SubModel(BaseModel):
         aa: int = Field(5, alias='a', description='Key A')
         ab: int = 6
@@ -111,7 +110,7 @@ b: 3
 '''
 
 
-def test_multiline_comment():
+def test_multiline_comment() -> None:
     class SimpleModel(BaseModel):
         a: str = Field('value a', description='This is\nthe topmost\nvalue of the model')
         b: int = Field(3, description='\nThis is\nvalue b')
@@ -125,7 +124,7 @@ def test_multiline_comment():
         '# value b\n'
 
 
-def test_alias_not_in_file():
+def test_alias_not_in_file() -> None:
     class MyEnum(str, Enum):
         A = 'aa'
 
@@ -135,7 +134,7 @@ def test_alias_not_in_file():
         c: MyEnum = MyEnum.A
 
     class EncapModel(BaseModel):
-        my_list: List[SimpleModel] = []
+        my_list: list[SimpleModel] = []
 
     assert dump_yaml(cmap_from_model(EncapModel(my_list=[SimpleModel(), SimpleModel(b=5), ]))) == \
         'my_list:\n' \

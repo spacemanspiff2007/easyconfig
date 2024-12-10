@@ -48,6 +48,9 @@ def _get_yaml_value(obj, parent_model: BaseModel, *, skip_none=True, obj_name: s
 def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
     cmap = CommentedMap()
     for obj_name, field in model.model_fields.items():
+        if field.exclude is True:
+            continue
+
         value = getattr(model, obj_name, MISSING)
         if value is MISSING or (skip_none and value is None):
             continue

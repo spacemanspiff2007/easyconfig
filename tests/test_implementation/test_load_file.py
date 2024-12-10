@@ -1,13 +1,13 @@
 import pytest
-from helper import Path
 from pydantic import BaseModel as PydanticBaseModel
 
 from easyconfig import AppBaseModel, BaseModel
 from easyconfig.config_objs import AppConfig
+from helper import Path
 
 
 @pytest.mark.parametrize('base_cls', [PydanticBaseModel, BaseModel, AppBaseModel])
-def test_mutate_simple(base_cls):
+def test_mutate_simple(base_cls) -> None:
     class SimpleModel(base_cls):
         a: int = 5
         b: int = 6
@@ -25,7 +25,7 @@ def test_mutate_simple(base_cls):
 
 
 @pytest.mark.parametrize('base_cls', [PydanticBaseModel, BaseModel, AppBaseModel])
-def test_mutate_nested(base_cls):
+def test_mutate_nested(base_cls) -> None:
     class SubModel(base_cls):
         aa: int = 5
 

@@ -1,7 +1,10 @@
+from __future__ import annotations
+
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Callable, Dict, Final, List, Tuple, Type, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Final
 
 from pydantic import BaseModel
+from typing_extensions import Self
 
 from easyconfig import AppConfigMixin
 from easyconfig.__const__ import MISSING, MISSING_TYPE
@@ -10,35 +13,36 @@ from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowed
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
     from pydantic.fields import FieldInfo
 
-    import easyconfig
 
-HINT_CONFIG_OBJ = TypeVar('HINT_CONFIG_OBJ', bound='ConfigObj')
-HINT_CONFIG_OBJ_TYPE = Type[HINT_CONFIG_OBJ]
+def should_be_copied(o: object) -> bool:
+    return isfunction(o) or isinstance(o, property)
 
-NO_COPY = [n for n, o in getmembers(AppConfigMixin) if isfunction(o)]
+
+NO_COPY = tuple(n for n, o in getmembers(AppConfigMixin) if should_be_copied(o))
 
 
 class ConfigObj:
-    def __init__(
-        self,
-        model: BaseModel,
-        path: Tuple[str, ...] = ('__root__',),
-        parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
-    ):
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> None:
+        super().__init__(**kwargs)
+
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
         self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: Dict[str, FieldInfo] = model.model_fields
-        self._obj_model_private_attrs: List[str] = list(model.__private_attributes__.keys())
+        self._obj_model_fields: dict[str, FieldInfo] = model.model_fields
+        self._obj_model_private_attrs: list[str] = list(model.__private_attributes__.keys())
 
-        self._obj_keys: Tuple[str, ...] = ()
-        self._obj_values: Dict[str, Any] = {}
-        self._obj_children: Dict[str, Union[HINT_CONFIG_OBJ, Tuple[HINT_CONFIG_OBJ, ...]]] = {}
+        self._obj_keys: tuple[str, ...] = ()
+        self._obj_values: dict[str, Any] = {}
+        self._obj_children: dict[str, ConfigObj | tuple[ConfigObj, ...]] = {}
 
-        self._obj_subscriptions: List[SubscriptionParent] = []
+        self._obj_subscriptions: list[SubscriptionParent] = []
 
         self._last_model: BaseModel = model
 
@@ -47,25 +51,22 @@ class ConfigObj:
         return '.'.join(self._obj_path)
 
     @classmethod
-    def from_model(
-        cls,
-        model: BaseModel,
-        path: Tuple[str, ...] = ('__root__',),
-        parent: Union[MISSING_TYPE, HINT_CONFIG_OBJ] = MISSING,
-    ):
+    def from_model(cls, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                   parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> Self:
+
         # Copy functions from the class definition to the child class
         functions = {}
         for name, member in getmembers(model.__class__):
-            if not name.startswith('_') and name not in NO_COPY and isfunction(member):
+            if not name.startswith('_') and name not in NO_COPY and should_be_copied(member):
                 functions[name] = member
 
         # Create a new class that pulls down the user defined functions if there are any
         # It's not possible to attach the functions to the existing class instance
         if functions:
             new_cls = type(f'{model.__class__.__name__}{cls.__name__}', (cls,), functions)
-            ret = new_cls(model, path, parent)
+            ret = new_cls(model, path, parent, **kwargs)
         else:
-            ret = cls(model, path, parent)
+            ret = cls(model, path, parent, **kwargs)
 
         # Set the values or create corresponding subclasses
         keys = []
@@ -77,10 +78,10 @@ class ConfigObj:
             keys.append(key)
 
             if isinstance(value, BaseModel):
-                ret._obj_children[key] = attrib = cls.from_model(value, path=(*path, key), parent=ret)
+                ret._obj_children[key] = attrib = ConfigObj.from_model(value, path=(*path, key), parent=ret)
             elif isinstance(value, tuple) and all(isinstance(x, BaseModel) for x in value):
                 ret._obj_children[key] = attrib = tuple(
-                    cls.from_model(o, path=(*path, key, str(i)), parent=ret) for i, o in enumerate(value)
+                    ConfigObj.from_model(o, path=(*path, key, str(i)), parent=ret) for i, o in enumerate(value)
                 )
             else:
                 ret._obj_values[key] = attrib = value
@@ -145,7 +146,7 @@ class ConfigObj:
 
         return propagate
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._full_obj_path}>'
 
     # def __getattr__(self, item):
@@ -155,9 +156,17 @@ class ConfigObj:
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------
-    def subscribe_for_changes(
-        self, func: Callable[[], Any], propagate: bool = False, on_next_load: bool = True
-    ) -> 'easyconfig.config_objs.ConfigObjSubscription':
+    @property
+    def loaded_file_path(self) -> Path:
+        """Path to the loaded configuration file"""
+
+        obj = self
+        while obj._obj_path != ('__root__',):
+            obj = obj._obj_parent
+        return obj.loaded_file_path
+
+    def subscribe_for_changes(self, func: Callable[[], Any], *,
+                              propagate: bool = False, on_next_load: bool = True) -> ConfigObjSubscription:
         """When a value in this container changes the passed function will be called.
 
         :param func: function which will be called
@@ -176,18 +185,34 @@ class ConfigObj:
         self._obj_subscriptions.append(sub)
         return ConfigObjSubscription(sub, target)
 
+    # -----------------------------------------------------
+    # pydantic 1
     @classmethod
-    def parse_obj(cls, *args, **kwargs):
+    def parse_obj(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_raw(cls, *args, **kwargs):
+    def parse_raw(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_file(cls, *args, **kwargs):
+    def parse_file(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def from_orm(cls, *args, **kwargs):
+    def from_orm(cls, *args: Any, **kwargs: Any):
+        raise FunctionCallNotAllowedError()
+
+    # -----------------------------------------------------
+    # pydantic 2
+    @classmethod
+    def model_validate_strings(cls, *args: Any, **kwargs: Any):
+        raise FunctionCallNotAllowedError()
+
+    @classmethod
+    def model_validate(cls, *args: Any, **kwargs: Any):
+        raise FunctionCallNotAllowedError()
+
+    @classmethod
+    def model_validate_json(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
