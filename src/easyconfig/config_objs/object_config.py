@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from collections.abc import Callable
 from inspect import getmembers, isfunction
 from typing import TYPE_CHECKING, Any, Final
 
@@ -14,6 +13,9 @@ from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowed
 
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
     from pydantic.fields import FieldInfo
 
 
@@ -76,10 +78,10 @@ class ConfigObj:
             keys.append(key)
 
             if isinstance(value, BaseModel):
-                ret._obj_children[key] = attrib = cls.from_model(value, path=(*path, key), parent=ret)
+                ret._obj_children[key] = attrib = ConfigObj.from_model(value, path=(*path, key), parent=ret)
             elif isinstance(value, tuple) and all(isinstance(x, BaseModel) for x in value):
                 ret._obj_children[key] = attrib = tuple(
-                    cls.from_model(o, path=(*path, key, str(i)), parent=ret) for i, o in enumerate(value)
+                    ConfigObj.from_model(o, path=(*path, key, str(i)), parent=ret) for i, o in enumerate(value)
                 )
             else:
                 ret._obj_values[key] = attrib = value
@@ -154,6 +156,15 @@ class ConfigObj:
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------
+    @property
+    def loaded_file_path(self) -> Path:
+        """Path to the loaded configuration file"""
+
+        obj = self
+        while obj._obj_path != ('__root__',):
+            obj = obj._obj_parent
+        return obj.loaded_file_path
+
     def subscribe_for_changes(self, func: Callable[[], Any], *,
                               propagate: bool = False, on_next_load: bool = True) -> ConfigObjSubscription:
         """When a value in this container changes the passed function will be called.
@@ -177,31 +188,31 @@ class ConfigObj:
     # -----------------------------------------------------
     # pydantic 1
     @classmethod
-    def parse_obj(cls, *args, **kwargs):
+    def parse_obj(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_raw(cls, *args, **kwargs):
+    def parse_raw(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_file(cls, *args, **kwargs):
+    def parse_file(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def from_orm(cls, *args, **kwargs):
+    def from_orm(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     # -----------------------------------------------------
     # pydantic 2
     @classmethod
-    def model_validate_strings(cls, *args, **kwargs):
+    def model_validate_strings(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate(cls, *args, **kwargs):
+    def model_validate(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate_json(cls, *args, **kwargs):
+    def model_validate_json(cls, *args: Any, **kwargs: Any):
         raise FunctionCallNotAllowedError()

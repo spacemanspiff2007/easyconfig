@@ -6,8 +6,9 @@ import pytest
 from pydantic import BaseModel, Field, ValidationError
 
 from easyconfig import create_app_config
+from easyconfig.config_objs import AppConfig, ConfigObj
 from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetError
-from easyconfig.models import BaseModel as EasyBaseModel
+from easyconfig.models import BaseModel as EasyBaseModel, AppBaseModel as EasyAppBaseModel
 
 
 def test_simple() -> None:
@@ -99,3 +100,21 @@ def test_list_of_models() -> None:
             ]
         )
     )
+
+
+def test_path() -> None:
+    class SimpleModel(EasyBaseModel):
+        z: str = 'asdf'
+
+    class ParentModel(EasyAppBaseModel):
+        b: SimpleModel = SimpleModel()
+
+    a = create_app_config(ParentModel())
+
+    assert isinstance(a, AppConfig)
+    assert isinstance(a.b, ConfigObj)
+
+    a._file_path = o = object()
+
+    assert a.loaded_file_path is o
+    assert a.b.loaded_file_path is o

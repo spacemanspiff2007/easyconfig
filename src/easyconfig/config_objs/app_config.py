@@ -27,6 +27,15 @@ class AppConfig(ConfigObj):
         self._file_path: Path | None = None
 
     @property
+    def loaded_file_path(self) -> Path:
+        """Path to the loaded configuration file"""
+
+        if self._file_path is None:
+            msg = 'No file loaded'
+            raise ValueError(msg)
+        return self._file_path
+
+    @property
     def load_preprocess(self) -> PreProcess:
         """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
         return self._preprocess
@@ -65,7 +74,7 @@ class AppConfig(ConfigObj):
         self._set_values(model_obj)
         return self
 
-    def load_config_file(self, path: Path | str | None = None, expansion: bool = True) -> Self:
+    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
         :param path: Path to file

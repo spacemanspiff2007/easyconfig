@@ -5,14 +5,18 @@ from typing import TYPE_CHECKING
 from typing_extensions import Self
 
 from easyconfig.models.config import ConfigMixin
-from easyconfig.pre_process import PreProcess
 
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from easyconfig.pre_process import PreProcess
+
 
 class AppConfigMixin(ConfigMixin):
+    @property
+    def loaded_file_path(self) -> Path:
+        """Path to the loaded configuration file"""
 
     @property
     def load_preprocess(self) -> PreProcess:
@@ -32,7 +36,7 @@ class AppConfigMixin(ConfigMixin):
         :param expansion: Expand ${...} in strings
         """
 
-    def load_config_file(self, path: Path | str | None = None, expansion: bool = True) -> Self:
+    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
         :param path: Path to file

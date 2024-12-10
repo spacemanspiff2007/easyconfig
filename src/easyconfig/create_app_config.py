@@ -1,6 +1,6 @@
 from collections.abc import Callable, Iterable
 from inspect import isfunction
-from typing import Any, TypeVar, Union
+from typing import Any, TypeAlias, TypeVar
 
 from pydantic import BaseModel
 
@@ -10,11 +10,11 @@ from easyconfig.errors import ExtraKwArgsNotAllowedError
 
 
 TYPE_WRAPPED = TypeVar('TYPE_WRAPPED', bound=BaseModel)
-TYPE_DEFAULTS = Union[BaseModel, dict[str, Any]]
+TYPE_DEFAULTS: TypeAlias = BaseModel | dict[str, Any]
 
 
 # noinspection PyProtectedMember
-def check_field_args(model: AppConfig, allowed: frozenset[str]):
+def check_field_args(model: AppConfig, allowed: frozenset[str]) -> None:
     """Check extra args of pydantic fields"""
 
     # Model fields
@@ -62,8 +62,8 @@ def get_file_values(
 
 def create_app_config(
     model: TYPE_WRAPPED,
-    file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING,
-    validate_file_values=True,
+    file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING, *,
+    validate_file_values: bool = True,
     check_field_extra_args: Iterable[str] | None = (ARG_NAME_IN_FILE,),
 ) -> TYPE_WRAPPED:
 
