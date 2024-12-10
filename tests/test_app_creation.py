@@ -8,7 +8,8 @@ from pydantic import BaseModel, Field, ValidationError
 from easyconfig import create_app_config
 from easyconfig.config_objs import AppConfig, ConfigObj
 from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetError
-from easyconfig.models import BaseModel as EasyBaseModel, AppBaseModel as EasyAppBaseModel
+from easyconfig.models import AppBaseModel as EasyAppBaseModel
+from easyconfig.models import BaseModel as EasyBaseModel
 
 
 def test_simple() -> None:
