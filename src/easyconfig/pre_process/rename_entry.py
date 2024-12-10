@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from typing import Any, Final, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
 from .base import PathAccessor, PreProcessBase
+
 
 if TYPE_CHECKING:
     from collections.abc import Callable

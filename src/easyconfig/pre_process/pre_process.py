@@ -5,8 +5,8 @@ from pydantic import BaseModel
 from typing_extensions import Self, override
 
 from easyconfig.pre_process.base import PreProcessBase
-from .delete_entry import DeleteEntryPreProcess
 
+from .delete_entry import DeleteEntryPreProcess
 from .move_entry import MoveEntryPreProcess
 from .rename_entry import RenameEntryPreProcess
 
