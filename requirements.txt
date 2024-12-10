@@ -1,9 +1,13 @@
 # runtime dependencies
 -r requirements_setup.txt
 
+# Dependencies for old python versions
+pre-commit  == 3.5.0; python_version < '3.9'
+pytest      == 7.4.4; python_version < '3.10'
+
 # testing dependencies
-pytest     == 8.3.4
-pre-commit == 4.0.1
+pre-commit  == 4.0.1; python_version >= '3.9'
+pytest      == 8.3.4; python_version >= '3.10'
 
 # linter
 ruff == 0.8.2
