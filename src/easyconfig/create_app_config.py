@@ -5,7 +5,7 @@ from typing import Any, TypeAlias, TypeVar
 from pydantic import BaseModel
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING, MISSING_TYPE
-from easyconfig.config_objs.app_config import AppConfig, yaml_rt
+from easyconfig.config_objs.app_config import AppConfig, ConfigObj, yaml_rt
 from easyconfig.errors import ExtraKwArgsNotAllowedError
 
 
@@ -14,7 +14,7 @@ TYPE_DEFAULTS: TypeAlias = BaseModel | dict[str, Any]
 
 
 # noinspection PyProtectedMember
-def check_field_args(model: AppConfig, allowed: frozenset[str]) -> None:
+def check_field_args(model: ConfigObj, allowed: frozenset[str]) -> None:
     """Check extra args of pydantic fields"""
 
     # Model fields

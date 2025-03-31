@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import Any
 
 from .load_file import is_path, read_file_contents
 from .load_var import read_env_var
@@ -56,7 +57,7 @@ def expand_text(text: str, /, loc: ExpansionLocation):
     return text
 
 
-def expand_obj(obj, loc: ExpansionLocation | None = None):
+def expand_obj(obj: Any, loc: ExpansionLocation | None = None):
     if loc is None:
         loc = ExpansionLocation((), ())
 
@@ -65,7 +66,7 @@ def expand_obj(obj, loc: ExpansionLocation | None = None):
             obj[key] = expand_obj(value, loc.process_obj(str(key)))
         return obj
 
-    if isinstance(obj, (list, tuple)):
+    if isinstance(obj, list):
         for i, value in enumerate(obj):
             obj[i] = expand_obj(value, loc.process_obj(f'[{i:d}]'))
         return obj

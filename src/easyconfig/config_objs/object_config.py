@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from inspect import getmembers, isfunction
-from typing import TYPE_CHECKING, Any, Final
+from typing import TYPE_CHECKING, Any, Final, NoReturn
 
 from pydantic import BaseModel
 from typing_extensions import Self
@@ -181,38 +181,38 @@ class ConfigObj:
                 msg = f'{target} is already subscribed!'
                 raise DuplicateSubscriptionError(msg)
 
-        sub = SubscriptionParent(func, self, propagate=propagate, on_next=on_next_load)
+        sub = SubscriptionParent(func, self._obj_subscriptions.remove, propagate=propagate, on_next=on_next_load)
         self._obj_subscriptions.append(sub)
         return ConfigObjSubscription(sub, target)
 
     # -----------------------------------------------------
     # pydantic 1
     @classmethod
-    def parse_obj(cls, *args: Any, **kwargs: Any):
+    def parse_obj(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_raw(cls, *args: Any, **kwargs: Any):
+    def parse_raw(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_file(cls, *args: Any, **kwargs: Any):
+    def parse_file(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def from_orm(cls, *args: Any, **kwargs: Any):
+    def from_orm(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     # -----------------------------------------------------
     # pydantic 2
     @classmethod
-    def model_validate_strings(cls, *args: Any, **kwargs: Any):
+    def model_validate_strings(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate(cls, *args: Any, **kwargs: Any):
+    def model_validate(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate_json(cls, *args: Any, **kwargs: Any):
+    def model_validate_json(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()

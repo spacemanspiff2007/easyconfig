@@ -1,11 +1,14 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
-from .base import PathAccessor, PreProcessBase
+from easyconfig.pre_process.base import ContainingObj, PathAccessor, PreProcessBase
+
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class DeleteEntryPreProcess(PreProcessBase):
@@ -18,7 +21,7 @@ class DeleteEntryPreProcess(PreProcessBase):
         return self.dst == other.dst
 
     @override
-    def run(self, obj: dict | list, log_func: Callable[[str], Any] | None = None) -> None:
+    def run(self, obj: ContainingObj, log_func: Callable[[str], Any] | None = None) -> None:
         if (parent := self.dst.get_containing_obj(obj)) is None:
             return None
 
