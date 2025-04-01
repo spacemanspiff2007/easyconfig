@@ -29,7 +29,7 @@ class AppConfigMixin(ConfigMixin):
         :param path: Path obj or str
         """
 
-    def load_config_dict(self, cfg: dict, /, expansion: bool = True) -> Self:
+    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
         :param cfg: config dict which will be loaded

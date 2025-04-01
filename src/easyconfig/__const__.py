@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Final, Literal
+from typing import Final, Literal, TypeAlias
 
 
 class _MissingType(Enum):
@@ -10,7 +10,7 @@ class _MissingType(Enum):
 
 
 MISSING: Final = _MissingType.MISSING_OBJ
-MISSING_TYPE: Final = Literal[_MissingType.MISSING_OBJ]
+MISSING_TYPE: TypeAlias = Literal[_MissingType.MISSING_OBJ]
 
 
 ARG_NAME_IN_FILE: Final = 'in_file'

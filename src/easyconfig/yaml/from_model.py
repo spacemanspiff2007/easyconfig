@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel
 
@@ -8,7 +9,7 @@ from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING
 from easyconfig.yaml import CommentedMap, CommentedSeq
 
 
-def _get_yaml_value(obj, parent_model: BaseModel, *, skip_none=True, obj_name: str | None = None):
+def _get_yaml_value(obj: Any, parent_model: BaseModel, *, skip_none: bool = True, obj_name: str | None = None):
     if obj is None:
         return None
 
@@ -39,13 +40,17 @@ def _get_yaml_value(obj, parent_model: BaseModel, *, skip_none=True, obj_name: s
             ret[yaml_key] = _get_yaml_value(value, parent_model=parent_model, skip_none=skip_none)
         return ret
 
+    if obj_name is None:
+        msg = 'Object name must not be None!'
+        raise ValueError(msg)
+
     # YAML can't serialize all data pydantic types natively, so we use the serializer of the model
     # This works since a valid json is always a valid YAML. It's not nice but it's something!
     dump = parent_model.model_dump(mode='json', include={obj_name})
     return dump[obj_name]
 
 
-def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
+def cmap_from_model(model: BaseModel, *, skip_none: bool = True) -> CommentedMap:
     cmap = CommentedMap()
     for obj_name, field in model.model_fields.items():
         if field.exclude is True:
@@ -60,8 +65,11 @@ def cmap_from_model(model: BaseModel, skip_none=True) -> CommentedMap:
             yaml_key = obj_name
         description = field.description
 
-        if (extra_kwargs := field.json_schema_extra) is not None and not extra_kwargs.get(ARG_NAME_IN_FILE, True):
-            continue
+        if (json_schema_extra := field.json_schema_extra) is not None:
+            if not isinstance(json_schema_extra, dict):
+                continue
+            if not json_schema_extra.get(ARG_NAME_IN_FILE, True):
+                continue
 
         # get yaml representation
         cmap[yaml_key] = _get_yaml_value(value, parent_model=model, obj_name=obj_name)

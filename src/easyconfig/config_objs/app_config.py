@@ -56,7 +56,7 @@ class AppConfig(ConfigObj):
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict, /, expansion: bool = True) -> Self:
+    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
         :param cfg: config dict which will be loaded
@@ -112,3 +112,6 @@ class AppConfig(ConfigObj):
         c_map = cmap_from_model(self._file_defaults)
         write_aligned_yaml(c_map, buffer, extra_indent=1)
         return buffer.getvalue()
+
+    def __repr__(self) -> str:
+        return f'<{self.__class__.__name__} {self._file_path} at {id(self)}>'

@@ -1,16 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable, MutableMapping, MutableSequence
-from typing import TYPE_CHECKING, Any, Final, NewType, TypeVar
+from typing import TYPE_CHECKING, Any, Final, TypeAlias, TypeVar
 
-from easyconfig.yaml import cmap_from_model
+from easyconfig.yaml import CommentedMap, cmap_from_model
 
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
 
 
-ContainingObj = NewType('ContainingObj', MutableSequence | MutableMapping)
+ContainingObj: TypeAlias = MutableSequence | MutableMapping
 
 A = TypeVar('A', bound=ContainingObj)
 
@@ -35,7 +35,7 @@ class PathAccessor:
     def key_name(self) -> str:
         return str(self.path[-1])
 
-    def get_containing_obj(self, root: MutableSequence | MutableMapping) -> ContainingObj | None:
+    def get_containing_obj(self, root: ContainingObj) -> ContainingObj | None:
         path = self.path
 
         if len(path) <= 1:
@@ -54,7 +54,7 @@ class PathAccessor:
 
         return obj
 
-    def get_containing_obj_or_create_default(self, root: MutableSequence | MutableMapping,
+    def get_containing_obj_or_create_default(self, root: ContainingObj,
                                              default: BaseModel | None = None) -> ContainingObj | None:
         if (dst_obj := self.get_containing_obj(root)) is not None:
             return dst_obj
@@ -62,7 +62,7 @@ class PathAccessor:
         if default is None:
             return None
 
-        default_yaml = cmap_from_model(default)
+        default_yaml: CommentedMap | None = cmap_from_model(default)
         obj = root
 
         current_path: tuple[str, ...] = ()
@@ -116,7 +116,7 @@ class PathAccessor:
 
 
 class PreProcessBase:
-    def run(self, obj: MutableSequence | MutableMapping, log_func: Callable[[str], Any] | None = None) -> None:
+    def run(self, obj: ContainingObj, log_func: Callable[[str], Any] | None = None) -> None:
         raise NotImplementedError()
 
     def __eq__(self, other) -> bool:

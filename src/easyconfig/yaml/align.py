@@ -12,7 +12,7 @@ def get_column(obj: tuple[Any, Any, CommentToken | None, Any]):
     return token.column
 
 
-def align_comments(d, extra_indent=0):
+def align_comments(d: Any, extra_indent: int = 0):
     # Only process when it's a data structure -> dict or list
     is_dict = isinstance(d, dict)
     is_list = isinstance(d, list)

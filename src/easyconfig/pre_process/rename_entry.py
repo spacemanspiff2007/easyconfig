@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
-from .base import PathAccessor, PreProcessBase
+from .base import ContainingObj, PathAccessor, PreProcessBase
 
 
 if TYPE_CHECKING:
@@ -22,7 +22,7 @@ class RenameEntryPreProcess(PreProcessBase):
         return self.src == other.src and self.dst == other.dst
 
     @override
-    def run(self, obj: dict | list, log_func: Callable[[str], Any] | None = None) -> None:
+    def run(self, obj: ContainingObj, log_func: Callable[[str], Any] | None = None) -> None:
         if (parent := self.src.get_containing_obj(obj)) is None:
             return None
 

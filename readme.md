@@ -40,7 +40,12 @@ That way the users can have some guidance how to change the program behaviour.
 It's possible to use environment variable or files for expansion. Easyconfig will load all values
 
 # Changelog
-#### 0.4.0 (2024-01-10)
+#### 0.4.1 (2025-04-01)
+- added easyconfig.Field to have proper type hint for the ``in_file`` parameter
+
+
+# Changelog
+#### 0.4.0 (2024-12-10)
 - Minimum required python version is now 3.10
 - Added preprocessor to so it's possible to move and deprecate configuration entries
 - Added property to get the loaded configuration file

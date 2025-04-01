@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, NoReturn
 
 from easyconfig.errors import FunctionCallNotAllowedError
 
@@ -30,31 +30,31 @@ class ConfigMixin:
     # -----------------------------------------------------
     # pydantic 1
     @classmethod
-    def parse_obj(cls, *args: Any, **kwargs: Any):
+    def parse_obj(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_raw(cls, *args: Any, **kwargs: Any):
+    def parse_raw(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def parse_file(cls, *args: Any, **kwargs: Any):
+    def parse_file(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def from_orm(cls, *args: Any, **kwargs: Any):
+    def from_orm(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     # -----------------------------------------------------
     # pydantic 2
     @classmethod
-    def model_validate_strings(cls, *args: Any, **kwargs: Any):
+    def model_validate_strings(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate(cls, *args: Any, **kwargs: Any):
+    def model_validate(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()
 
     @classmethod
-    def model_validate_json(cls, *args: Any, **kwargs: Any):
+    def model_validate_json(cls, *args: Any, **kwargs: Any) -> NoReturn:
         raise FunctionCallNotAllowedError()

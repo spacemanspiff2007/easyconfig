@@ -89,8 +89,10 @@ With the ``in_file`` argument it's possible to skip entries from appearing in th
     :language_output: yaml
     :caption_output: Generated yaml file
 
-    from pydantic import Field
     from easyconfig import AppBaseModel, create_app_config
+
+    # import Field from easyconfig to get the correct type hint for the in_file parameter
+    from easyconfig import Field
 
 
     class MySimpleAppConfig(AppBaseModel):
