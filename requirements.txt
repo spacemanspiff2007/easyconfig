@@ -2,9 +2,9 @@
 -r requirements_setup.txt
 
 # testing dependencies
-pre-commit  == 4.2.0
-pytest      == 8.3.5
+pre-commit  == 4.3.0
+pytest      == 8.4.2
 
 # linter
-ruff == 0.11.2
+ruff == 0.14.3
 pur  == 7.3.3

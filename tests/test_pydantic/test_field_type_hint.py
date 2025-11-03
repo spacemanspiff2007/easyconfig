@@ -12,7 +12,7 @@ def get_field_overloads(text: str, *, insert_in_file: bool = False) -> list[str]
     without_comments = '\n'.join(line.split('#', 1)[0].rstrip() for line in text.splitlines())
 
     overloads = re.findall(r'@overload\ndef Field\([^)]+\) -> \w+: \.\.\.', without_comments)
-    assert len(overloads) == 4
+    assert len(overloads) == 6
 
     if insert_in_file:
         for i, overload in enumerate(overloads):
