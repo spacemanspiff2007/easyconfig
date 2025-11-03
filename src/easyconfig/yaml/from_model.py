@@ -52,7 +52,7 @@ def _get_yaml_value(obj: Any, parent_model: BaseModel, *, skip_none: bool = True
 
 def cmap_from_model(model: BaseModel, *, skip_none: bool = True) -> CommentedMap:
     cmap = CommentedMap()
-    for obj_name, field in model.model_fields.items():
+    for obj_name, field in model.__class__.model_fields.items():
         if field.exclude is True:
             continue
 
