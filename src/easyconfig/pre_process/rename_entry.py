@@ -40,3 +40,5 @@ class RenameEntryPreProcess(PreProcessBase):
             c_name = self.src.containing_name
             loc = f' in "{c_name}"' if c_name else ''
             log_func(f'Entry "{self.src.key_name:s}" renamed to "{self.dst.key_name:s}"{loc:s}')
+
+        return None

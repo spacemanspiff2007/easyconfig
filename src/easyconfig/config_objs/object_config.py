@@ -28,23 +28,21 @@ NO_COPY = tuple(n for n, o in getmembers(AppConfigMixin) if should_be_copied(o))
 
 class ConfigObj:
     def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
-                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> None:
+                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
-        self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: dict[str, FieldInfo] = model.__class__.model_fields
-        self._obj_model_private_attrs: list[str] = list(model.__private_attributes__.keys())
+        self._obj_model_class: Final[type[BaseModel]] = model.__class__
+        self._obj_model_fields: Final[dict[str, FieldInfo]] = model.__class__.model_fields
+        self._obj_model_private_attrs: Final[tuple[str, ...]] = tuple(model.__private_attributes__.keys())
 
         self._obj_keys: tuple[str, ...] = ()
         self._obj_values: dict[str, Any] = {}
         self._obj_children: dict[str, ConfigObj | tuple[ConfigObj, ...]] = {}
 
         self._obj_subscriptions: list[SubscriptionParent] = []
-
-        self._last_model: BaseModel = model
 
     @property
     def _full_obj_path(self) -> str:
@@ -58,7 +56,7 @@ class ConfigObj:
         functions = {}
         for name, member in getmembers(model.__class__):
             if not name.startswith('_') and name not in NO_COPY and should_be_copied(member):
-                functions[name] = member
+                functions[name] = member  # noqa: PERF403
 
         # Create a new class that pulls down the user defined functions if there are any
         # It's not possible to attach the functions to the existing class instance
@@ -108,9 +106,6 @@ class ConfigObj:
             msg = f'Instance of {BaseModel.__class__.__name__} expected, got {obj} ({type(obj)})!'
             raise TypeError(msg)
 
-        # Update last model so we can delegate function calls
-        self._last_model = obj
-
         value_changed = False
 
         # Values of child objects
@@ -148,10 +143,6 @@ class ConfigObj:
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._full_obj_path}>'
-
-    # def __getattr__(self, item):
-    #     # delegate call to model
-    #     return getattr(self._last_model, item)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes

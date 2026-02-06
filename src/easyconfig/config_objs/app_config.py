@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs.object_config import ConfigObj
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
 
 class AppConfig(ConfigObj):
     def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
-                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs) -> None:
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs: Any) -> None:
         super().__init__(model, path, parent, **kwargs)
 
         self._file_defaults: Final = file_defaults
@@ -56,34 +56,28 @@ class AppConfig(ConfigObj):
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
-        """Load the configuration from a dictionary
-
-        :param cfg: config dict which will be loaded
-        :param expansion: Expand ${...} in strings
-        """
+    def _update_from_dict(self, cfg: dict, *, expansion: bool = True) -> None:
         self._preprocess.run(cfg)
 
         if expansion:
             expand_obj(cfg)
 
         # validate data
-        model_obj = self._obj_model_class(**cfg)
+        model_obj = self._obj_model_class.model_validate(cfg)
 
         # update mutable objects
         self._set_values(model_obj)
-        return self
 
-    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
-        """Load configuration from a yaml file. If the file does not exist a default file will be created
+    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
+        """Load the configuration from a dictionary
 
-        :param path: Path to file
+        :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
-        if path is not None:
-            self.set_file_path(path)
-        assert isinstance(self._file_path, Path)
+        self._update_from_dict(cfg, expansion=expansion)
+        return self
 
+    def _create_and_read_file(self) -> CommentedMap:
         # create default config file
         if self._file_defaults is not None and not self._file_path.is_file():
             __yaml = self.generate_default_yaml()
@@ -96,7 +90,20 @@ class AppConfig(ConfigObj):
         if cfg is None:
             cfg = CommentedMap()
 
-        # load c_map data (which is a dict)
+        return cfg
+
+    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
+        """Load configuration from a yaml file. If the file does not exist a default file will be created
+
+        :param path: Path to file
+        :param expansion: Expand ${...} in strings
+        """
+        if path is not None:
+            self.set_file_path(path)
+        if not isinstance(self._file_path, Path):
+            raise TypeError()
+
+        cfg = self._create_and_read_file()
         self.load_config_dict(cfg, expansion=expansion)
         return self
 

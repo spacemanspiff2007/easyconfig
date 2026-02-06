@@ -24,7 +24,7 @@ def check_field_args(model: ConfigObj, allowed: frozenset[str]) -> None:
         if not set(extras).issubset(allowed):
             forbidden = sorted(set(extras) - allowed)
             msg = (
-                f'Extra kwargs for field "{name}" of {model._last_model.__class__.__name__} are not allowed: '
+                f'Extra kwargs for field "{name}" of {model._obj_model_class.__name__} are not allowed: '
                 f'{", ".join(forbidden)}'
             )
             raise ExtraKwArgsNotAllowedError(msg)

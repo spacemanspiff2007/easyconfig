@@ -54,3 +54,4 @@ class MoveEntryPreProcess(PreProcessBase):
 
         if log_func is not None:
             log_func(f'Entry "{self.src.path_name:s}" moved to "{self.dst.path_name:s}"')
+        return None
