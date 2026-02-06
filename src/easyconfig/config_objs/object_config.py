@@ -35,7 +35,7 @@ class ConfigObj:
         self._obj_path: Final = path
 
         self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: dict[str, FieldInfo] = model.model_fields
+        self._obj_model_fields: dict[str, FieldInfo] = model.__class__.model_fields
         self._obj_model_private_attrs: list[str] = list(model.__private_attributes__.keys())
 
         self._obj_keys: tuple[str, ...] = ()
