@@ -15,14 +15,14 @@ if TYPE_CHECKING:
 
 class AppConfigMixin(ConfigMixin):
     @property
-    def loaded_file_path(self) -> Path:
+    def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
     @property
     def load_preprocess(self) -> PreProcess:
         """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
 
-    def set_file_path(self, path: Path | str) -> None:
+    def set_file_path(self, path: Path | str) -> Self:
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.
 

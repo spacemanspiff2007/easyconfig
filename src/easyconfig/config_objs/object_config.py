@@ -148,13 +148,13 @@ class ConfigObj:
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def loaded_file_path(self) -> Path:
+    def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
         obj = self
         while obj._obj_path != ('__root__',):
             obj = obj._obj_parent
-        return obj.loaded_file_path
+        return obj.config_file_path
 
     def subscribe_for_changes(self, func: Callable[[], Any], *,
                               propagate: bool = False, on_next_load: bool = True) -> ConfigObjSubscription:

@@ -117,5 +117,5 @@ def test_path() -> None:
 
     a._file_path = o = object()
 
-    assert a.loaded_file_path is o
-    assert a.b.loaded_file_path is o
+    assert a.config_file_path is o
+    assert a.b.config_file_path is o

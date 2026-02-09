@@ -14,7 +14,7 @@ if TYPE_CHECKING:
 
 class ConfigMixin:
     @property
-    def loaded_file_path(self) -> Path:
+    def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
     def subscribe_for_changes(self, func: Callable[[], Any], *,
