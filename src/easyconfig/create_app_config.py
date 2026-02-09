@@ -108,4 +108,3 @@ def create_async_app_config(
         AsyncAppConfig, model=model, file_values=file_values,
         validate_file_values=validate_file_values, check_field_extra_args=check_field_extra_args
     )
-

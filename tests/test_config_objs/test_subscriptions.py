@@ -16,7 +16,7 @@ def pytest_ids(obj):
 
 
 class SubTestHelper:
-    def __init__(self, app_cls: type[AppConfig] | type[AsyncAppConfig]):
+    def __init__(self, app_cls: type[AppConfig] | type[AsyncAppConfig]) -> None:
         self._app_cls: Final = app_cls
         self._mock_cls: Final = AsyncMock if app_cls is AsyncAppConfig else Mock
 
@@ -26,7 +26,7 @@ class SubTestHelper:
     def from_model(self, obj: BaseModel) -> AppConfig | AsyncAppConfig:
         return self._app_cls.from_model(obj)
 
-    async def load_config_dict(self, obj: AppConfig | AsyncAppConfig, value: dict):
+    async def load_config_dict(self, obj: AppConfig | AsyncAppConfig, value: dict) -> None:
         if self._app_cls is AsyncAppConfig:
             await obj.load_config_dict(value)
         else:
