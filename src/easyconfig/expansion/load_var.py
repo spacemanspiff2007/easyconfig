@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from os import environ
 
-from .location import ExpansionLocation, log
+from easyconfig.expansion.location import ExpansionLocation, log
 
 
 def parse_env_key(key: str) -> tuple[str, str | None]:

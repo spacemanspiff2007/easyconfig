@@ -29,7 +29,7 @@ def read_value(key: str, /, loc: ExpansionLocation) -> tuple[str, str]:
     return name, value
 
 
-def expand_text(text: str, /, loc: ExpansionLocation):
+def expand_text(text: str, /, loc: ExpansionLocation) -> str:
     if not isinstance(text, str):
         return text
 
@@ -57,7 +57,7 @@ def expand_text(text: str, /, loc: ExpansionLocation):
     return text
 
 
-def expand_obj(obj: Any, loc: ExpansionLocation | None = None):
+def expand_obj(obj: Any, loc: ExpansionLocation | None = None) -> str:
     if loc is None:
         loc = ExpansionLocation((), ())
 

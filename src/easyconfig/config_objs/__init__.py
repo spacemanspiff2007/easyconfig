@@ -1,4 +1,4 @@
-from .subscription import ConfigObjSubscription, SubscriptionParent
+from .subscription import ConfigNodeSubscriptionManager, ConfigObjSubscription
 
 
 # isort: split

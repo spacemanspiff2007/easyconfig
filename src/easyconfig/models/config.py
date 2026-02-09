@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, NoReturn
 
+from typing_extensions import Self
+
 from easyconfig.errors import FunctionCallNotAllowedError
 
 
@@ -17,13 +19,17 @@ class ConfigMixin:
     def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
-    def subscribe_for_changes(self, func: Callable[[], Any], *,
-                              propagate: bool = False, on_next_load: bool = True) -> ConfigObjSubscription:
+    def subscribe_set_options(self, *, propagate: bool | None = None, on_next_value: bool | None = None) -> Self:
+        """Set options for the subscription of this object.
+
+        :param propagate: Propagate the change event to the parent object
+        :param on_next_value: Call the function the next time when values get loaded even if there is no value change
+        """
+
+    def subscribe_for_changes(self, func: Callable[[], Any]) -> ConfigObjSubscription:
         """When a value in this container changes the passed function will be called.
 
         :param func: function which will be called
-        :param propagate: Propagate the change event to the parent object
-        :param on_next_load: Call the function the next time when values get loaded even if there is no value change
         :return: object which can be used to cancel the subscription
         """
 

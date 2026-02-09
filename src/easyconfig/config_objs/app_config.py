@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any, Final
 from typing_extensions import override
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
+from easyconfig.config_objs import ConfigNodeSubscriptionManager
 from easyconfig.config_objs.object_config import ConfigObj
 from easyconfig.errors import FileDefaultsNotSetError
 from easyconfig.expansion import expand_obj
@@ -60,7 +61,7 @@ class AppConfigBase(ConfigObj):
 
         return self
 
-    def _update_from_dict(self, cfg: dict, *, expansion: bool = True) -> None:
+    def _update_from_dict(self, cfg: dict, *, expansion: bool = True) -> list[ConfigNodeSubscriptionManager]:
         self._preprocess.run(cfg)
 
         if expansion:
@@ -70,7 +71,9 @@ class AppConfigBase(ConfigObj):
         model_obj = self._obj_model_class.model_validate(cfg)
 
         # update mutable objects
-        self._set_values(model_obj)
+        subscriptions: list[ConfigNodeSubscriptionManager] = []
+        self._set_values(model_obj, subscriptions)
+        return subscriptions
 
     def _read_create_file(self) -> CommentedMap:
         if self._file_path is None:
@@ -122,7 +125,9 @@ class AppConfig(AppConfigBase):
         :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
-        self._update_from_dict(cfg, expansion=expansion)
+        subscriptions = self._update_from_dict(cfg, expansion=expansion)
+        for sub in subscriptions:
+            sub.call()
         return self
 
     @override
@@ -148,7 +153,9 @@ class AsyncAppConfig(AppConfigBase):
         :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
-        self._update_from_dict(cfg, expansion=expansion)
+        subscriptions = self._update_from_dict(cfg, expansion=expansion)
+        for sub in subscriptions:
+            await sub.call_async()
         return self
 
     @override

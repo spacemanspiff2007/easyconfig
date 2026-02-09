@@ -5,7 +5,7 @@ from typing import Any, TypeAlias, TypeVar
 from pydantic import BaseModel
 
 from easyconfig.__const__ import ARG_NAME_IN_FILE, MISSING, MISSING_TYPE
-from easyconfig.config_objs.app_config import AppConfig, ConfigObj, yaml_rt
+from easyconfig.config_objs.app_config import AppConfig, AsyncAppConfig, ConfigObj, yaml_rt
 from easyconfig.errors import ExtraKwArgsNotAllowedError
 
 
@@ -60,15 +60,16 @@ def get_file_values(
     return file_values
 
 
-def create_app_config(
-    model: TYPE_WRAPPED,
+def _create_app_config(
+    app_cls: type[AppConfig] | type[AsyncAppConfig],
+    model: BaseModel,
     file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING, *,
     validate_file_values: bool = True,
     check_field_extra_args: Iterable[str] | None = (ARG_NAME_IN_FILE,),
-) -> TYPE_WRAPPED:
+) -> AppConfig | AsyncAppConfig:
 
     file_defaults = get_file_values(model, file_values)
-    app_cfg = AppConfig.from_model(model, file_defaults=file_defaults)
+    app_cfg = app_cls.from_model(model, file_defaults=file_defaults)
 
     # ensure that the extra args have no typos
     if check_field_extra_args is not None:
@@ -81,3 +82,30 @@ def create_app_config(
         model.__class__.model_validate(_dict)
 
     return app_cfg
+
+
+def create_app_config(
+    model: TYPE_WRAPPED,
+    file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING, *,
+    validate_file_values: bool = True,
+    check_field_extra_args: Iterable[str] | None = (ARG_NAME_IN_FILE,),
+) -> TYPE_WRAPPED:
+
+    return _create_app_config(
+        AppConfig, model=model, file_values=file_values,
+        validate_file_values=validate_file_values, check_field_extra_args=check_field_extra_args
+    )
+
+
+def create_async_app_config(
+    model: TYPE_WRAPPED,
+    file_values: MISSING_TYPE | None | TYPE_DEFAULTS | Callable[[], TYPE_DEFAULTS] = MISSING, *,
+    validate_file_values: bool = True,
+    check_field_extra_args: Iterable[str] | None = (ARG_NAME_IN_FILE,),
+) -> TYPE_WRAPPED:
+
+    return _create_app_config(
+        AsyncAppConfig, model=model, file_values=file_values,
+        validate_file_values=validate_file_values, check_field_extra_args=check_field_extra_args
+    )
+
