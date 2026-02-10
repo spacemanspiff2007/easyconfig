@@ -41,6 +41,13 @@ It's possible to use environment variable or files for expansion. Easyconfig wil
 
 
 # Changelog
+#### 0.4.4 (2026-02-10)
+- Fixed missing convenience classes
+
+#### 0.4.3 (2026-02-10)
+- Allow async callbacks
+- Changed callback register signature
+
 #### 0.4.2 (2025-11-03)
 - Fixed an issue for the ``in_file`` parameter when using ``easyconfig.Field``
 
