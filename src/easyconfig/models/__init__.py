@@ -10,4 +10,4 @@ from .config import ConfigMixin
 # isort: split
 
 # Convenience Classes with sensible defaults
-from .convenience import AppBaseModel, AppBaseSettings, BaseModel, BaseSettings
+from .convenience import AppBaseModel, AppBaseSettings, AsyncAppBaseModel, AsyncAppBaseSettings, BaseModel, BaseSettings
