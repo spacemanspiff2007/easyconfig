@@ -34,7 +34,7 @@ def assert_signatures_match(cls, ref_cls) -> None:
     return None
 
 
-def test_assert_signature():
+def test_assert_signature() -> None:
     assert_signatures_match(ConfigObj, AsyncAppConfig)
     with pytest.raises(AttributeError):
         assert_signatures_match(AsyncAppConfig, ConfigObj)
@@ -54,7 +54,7 @@ def assert_same_coros(cls, ref_cls) -> None:
     return None
 
 
-def test_assert_same_coros():
+def test_assert_same_coros() -> None:
     assert_signatures_match(ConfigObj, AppConfig)
     with pytest.raises(AssertionError):
         assert_same_coros(AsyncAppConfig, AppConfig)
