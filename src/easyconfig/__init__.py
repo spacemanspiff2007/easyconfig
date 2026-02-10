@@ -9,4 +9,4 @@ from easyconfig.models import AppBaseModel, AppBaseSettings, AppConfigMixin, Bas
 
 # isort: split
 
-from easyconfig.create_app_config import create_app_config
+from easyconfig.create_app_config import create_app_config, create_async_app_config

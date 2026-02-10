@@ -33,3 +33,5 @@ class DeleteEntryPreProcess(PreProcessBase):
 
         if log_func is not None:
             log_func(f'Entry "{self.dst.path_name:s}" was deleted')
+
+        return None

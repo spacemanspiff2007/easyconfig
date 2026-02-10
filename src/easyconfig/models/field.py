@@ -1,5 +1,5 @@
 import re
-from typing import overload
+from typing import Literal, overload
 
 from pydantic import Field as PydanticField
 
@@ -13,7 +13,6 @@ from pydantic.fields import (
     Deprecated,
     FieldInfo,
     JsonDict,
-    Literal,
     Unpack,
     _EmptyKwargs,
     _typing_extra,
@@ -67,8 +66,6 @@ def Field(
     in_file: bool = True,
     **extra: Unpack[_EmptyKwargs],
 ) -> Any: ...
-
-
 @overload  # `default` argument set, validate_default=True (no type checking on the default value)
 def Field(
     default: Any,
@@ -298,7 +295,7 @@ def Field(*args, in_file: bool = True, **kwargs):  # noqa: N802
     :param in_file: Boolean that defines whether the field should be visible in the default file.
     :param kwargs: Keyword arguments for the pydantic.Field constructor.
     """
-    json_schema_extra = kwargs.get('json_schema_extra', None)
+    json_schema_extra = kwargs.get('json_schema_extra')
     if json_schema_extra is None:
         json_schema_extra = {'in_file': in_file}
     elif isinstance(json_schema_extra, dict):

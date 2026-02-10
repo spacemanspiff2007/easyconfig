@@ -8,8 +8,8 @@ from typing_extensions import Self
 
 from easyconfig import AppConfigMixin
 from easyconfig.__const__ import MISSING, MISSING_TYPE
-from easyconfig.config_objs import ConfigObjSubscription, SubscriptionParent
-from easyconfig.errors import DuplicateSubscriptionError, FunctionCallNotAllowedError
+from easyconfig.config_objs import ConfigNodeSubscriptionManager, ConfigObjSubscription
+from easyconfig.errors import FunctionCallNotAllowedError
 
 
 if TYPE_CHECKING:
@@ -28,23 +28,21 @@ NO_COPY = tuple(n for n, o in getmembers(AppConfigMixin) if should_be_copied(o))
 
 class ConfigObj:
     def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
-                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs) -> None:
+                 parent: MISSING_TYPE | ConfigObj = MISSING, **kwargs: Any) -> None:
         super().__init__(**kwargs)
 
         self._obj_parent: Final = parent
         self._obj_path: Final = path
 
-        self._obj_model_class: Final = model.__class__
-        self._obj_model_fields: dict[str, FieldInfo] = model.model_fields
-        self._obj_model_private_attrs: list[str] = list(model.__private_attributes__.keys())
+        self._obj_model_class: Final[type[BaseModel]] = model.__class__
+        self._obj_model_fields: Final[dict[str, FieldInfo]] = model.__class__.model_fields
+        self._obj_model_private_attrs: Final[tuple[str, ...]] = tuple(model.__private_attributes__.keys())
 
         self._obj_keys: tuple[str, ...] = ()
         self._obj_values: dict[str, Any] = {}
         self._obj_children: dict[str, ConfigObj | tuple[ConfigObj, ...]] = {}
 
-        self._obj_subscriptions: list[SubscriptionParent] = []
-
-        self._last_model: BaseModel = model
+        self._obj_subscriptions: ConfigNodeSubscriptionManager | None = None
 
     @property
     def _full_obj_path(self) -> str:
@@ -58,7 +56,7 @@ class ConfigObj:
         functions = {}
         for name, member in getmembers(model.__class__):
             if not name.startswith('_') and name not in NO_COPY and should_be_copied(member):
-                functions[name] = member
+                functions[name] = member  # noqa: PERF403
 
         # Create a new class that pulls down the user defined functions if there are any
         # It's not possible to attach the functions to the existing class instance
@@ -103,13 +101,10 @@ class ConfigObj:
         ret._obj_keys = tuple(keys)
         return ret
 
-    def _set_values(self, obj: BaseModel) -> bool:
+    def _set_values(self, obj: BaseModel, subscriptions: list[ConfigNodeSubscriptionManager]) -> bool:
         if not isinstance(obj, BaseModel):
             msg = f'Instance of {BaseModel.__class__.__name__} expected, got {obj} ({type(obj)})!'
             raise TypeError(msg)
-
-        # Update last model so we can delegate function calls
-        self._last_model = obj
 
         value_changed = False
 
@@ -121,15 +116,15 @@ class ConfigObj:
 
             if isinstance(child, tuple):
                 for i, c in enumerate(child):
-                    value_changed = c._set_values(value[i]) or value_changed
+                    value_changed = c._set_values(value[i], subscriptions=subscriptions) or value_changed
             else:
-                value_changed = child._set_values(value) or value_changed
+                value_changed = child._set_values(value, subscriptions=subscriptions) or value_changed
 
         # Values of this object
         for key in self._obj_values:
-            value = getattr(obj, key, MISSING)
-            if value is MISSING:
+            if (value := getattr(obj, key, MISSING)) is MISSING:
                 continue
+
             old_value = self._obj_values.get(key, MISSING)
             self._obj_values[key] = value
 
@@ -140,50 +135,54 @@ class ConfigObj:
                 value_changed = True
 
         # Notify subscribers
-        propagate = False if self._obj_subscriptions else value_changed
-        for sub in self._obj_subscriptions:
-            propagate = sub.notify(value_changed) or propagate
+        if sub_manager := self._obj_subscriptions:
+            return sub_manager.notify(value_changed, subscriptions)
 
-        return propagate
+        return value_changed
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._full_obj_path}>'
-
-    # def __getattr__(self, item):
-    #     # delegate call to model
-    #     return getattr(self._last_model, item)
 
     # ------------------------------------------------------------------------------------------------------------------
     # Match class signature with the Mixin Classes
     # ------------------------------------------------------------------------------------------------------------------
     @property
-    def loaded_file_path(self) -> Path:
+    def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
-        obj = self
+        obj: ConfigObj | MISSING_TYPE = self
         while obj._obj_path != ('__root__',):
             obj = obj._obj_parent
-        return obj.loaded_file_path
+            if obj is MISSING:
+                msg = f'Parent object of {self._full_obj_path} is missing!'
+                raise ValueError(msg)
+        return obj.config_file_path
 
-    def subscribe_for_changes(self, func: Callable[[], Any], *,
-                              propagate: bool = False, on_next_load: bool = True) -> ConfigObjSubscription:
+    def subscribe_set_options(self, *, propagate: bool | None = None, on_next_value: bool | None = None) -> Self:
+        """Set options for the subscription of this object.
+
+        :param propagate: Propagate the change event to the parent object
+        :param on_next_value: Call the function the next time when values get loaded even if there is no value change
+        """
+
+        if self._obj_subscriptions is None:
+            self._obj_subscriptions = ConfigNodeSubscriptionManager()
+
+        self._obj_subscriptions.set_options(propagate=propagate, on_next_value=on_next_value)
+        return self
+
+    def subscribe_for_changes(self, func: Callable[[], Any]) -> ConfigObjSubscription:
         """When a value in this container changes the passed function will be called.
 
         :param func: function which will be called
-        :param propagate: Propagate the change event to the parent object
-        :param on_next_load: Call the function the next time when values get loaded even if there is no value change
         :return: object which can be used to cancel the subscription
         """
 
-        target = f'{func.__name__} @ {self._full_obj_path}'
-        for sub in self._obj_subscriptions:
-            if sub.func is func:
-                msg = f'{target} is already subscribed!'
-                raise DuplicateSubscriptionError(msg)
+        if self._obj_subscriptions is None:
+            self._obj_subscriptions = ConfigNodeSubscriptionManager()
 
-        sub = SubscriptionParent(func, self._obj_subscriptions.remove, propagate=propagate, on_next=on_next_load)
-        self._obj_subscriptions.append(sub)
-        return ConfigObjSubscription(sub, target)
+        target_name = f'{func.__name__} @ {self._full_obj_path}'
+        return self._obj_subscriptions.subscribe(func, target_name)
 
     # -----------------------------------------------------
     # pydantic 1

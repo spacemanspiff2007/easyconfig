@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+from asyncio import Lock
 from io import StringIO
 from pathlib import Path
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Any, Final
 
 from easyconfig.__const__ import MISSING, MISSING_TYPE
 from easyconfig.config_objs.object_config import ConfigObj
@@ -16,10 +17,12 @@ if TYPE_CHECKING:
     from pydantic import BaseModel
     from typing_extensions import Self
 
+    from easyconfig.config_objs import ConfigNodeSubscriptionManager
 
-class AppConfig(ConfigObj):
+
+class AppConfigBase(ConfigObj):
     def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
-                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs) -> None:
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs: Any) -> None:
         super().__init__(model, path, parent, **kwargs)
 
         self._file_defaults: Final = file_defaults
@@ -27,11 +30,11 @@ class AppConfig(ConfigObj):
         self._file_path: Path | None = None
 
     @property
-    def loaded_file_path(self) -> Path:
+    def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
         if self._file_path is None:
-            msg = 'No file loaded'
+            msg = 'No file path set'
             raise ValueError(msg)
         return self._file_path
 
@@ -40,7 +43,7 @@ class AppConfig(ConfigObj):
         """A preprocessor which can be used to preprocess the configuration data before it is loaded"""
         return self._preprocess
 
-    def set_file_path(self, path: Path | str) -> None:
+    def set_file_path(self, path: Path | str) -> Self:
         """Set the path to the configuration file.
         If no file extension is specified ``.yml`` will be automatically appended.
 
@@ -56,33 +59,26 @@ class AppConfig(ConfigObj):
         if not self._file_path.suffix:
             self._file_path = self._file_path.with_suffix('.yml')
 
-    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
-        """Load the configuration from a dictionary
+        return self
 
-        :param cfg: config dict which will be loaded
-        :param expansion: Expand ${...} in strings
-        """
+    def _update_from_dict(self, cfg: dict, *, expansion: bool = True) -> list[ConfigNodeSubscriptionManager]:
         self._preprocess.run(cfg)
 
         if expansion:
             expand_obj(cfg)
 
         # validate data
-        model_obj = self._obj_model_class(**cfg)
+        model_obj = self._obj_model_class.model_validate(cfg)
 
         # update mutable objects
-        self._set_values(model_obj)
-        return self
+        subscriptions: list[ConfigNodeSubscriptionManager] = []
+        self._set_values(model_obj, subscriptions)
+        return subscriptions
 
-    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
-        """Load configuration from a yaml file. If the file does not exist a default file will be created
-
-        :param path: Path to file
-        :param expansion: Expand ${...} in strings
-        """
-        if path is not None:
-            self.set_file_path(path)
-        assert isinstance(self._file_path, Path)
+    def _read_create_file(self) -> CommentedMap:
+        if self._file_path is None:
+            msg = 'File path not set'
+            raise ValueError(msg)
 
         # create default config file
         if self._file_defaults is not None and not self._file_path.is_file():
@@ -96,9 +92,7 @@ class AppConfig(ConfigObj):
         if cfg is None:
             cfg = CommentedMap()
 
-        # load c_map data (which is a dict)
-        self.load_config_dict(cfg, expansion=expansion)
-        return self
+        return cfg
 
     def generate_default_yaml(self) -> str:
         """Generate the default YAML structure
@@ -115,3 +109,62 @@ class AppConfig(ConfigObj):
 
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._file_path} at {id(self)}>'
+
+
+class AppConfig(AppConfigBase):
+
+    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
+        """Load the configuration from a dictionary
+
+        :param cfg: config dict which will be loaded
+        :param expansion: Expand ${...} in strings
+        """
+        subscriptions = self._update_from_dict(cfg, expansion=expansion)
+        for sub in subscriptions:
+            sub.call()
+        return self
+
+    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
+        """Load configuration from a yaml file. If the file does not exist a default file will be created
+
+        :param path: Path to file
+        :param expansion: Expand ${...} in strings
+        """
+        if path is not None:
+            self.set_file_path(path)
+
+        cfg = self._read_create_file()
+        self.load_config_dict(cfg, expansion=expansion)
+        return self
+
+
+class AsyncAppConfig(AppConfigBase):
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs: Any) -> None:
+        super().__init__(model=model, path=path, parent=parent, file_defaults=file_defaults, **kwargs)
+        self._lock: Final = Lock()
+
+    async def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
+        """Load the configuration from a dictionary
+
+        :param cfg: config dict which will be loaded
+        :param expansion: Expand ${...} in strings
+        """
+        async with self._lock:
+            subscriptions = self._update_from_dict(cfg, expansion=expansion)
+            for sub in subscriptions:
+                await sub.call_async()
+        return self
+
+    async def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
+        """Load configuration from a yaml file. If the file does not exist a default file will be created
+
+        :param path: Path to file
+        :param expansion: Expand ${...} in strings
+        """
+        if path is not None:
+            self.set_file_path(path)
+
+        cfg = self._read_create_file()
+        await self.load_config_dict(cfg, expansion=expansion)
+        return self

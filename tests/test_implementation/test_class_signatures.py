@@ -3,6 +3,7 @@ import inspect
 import pytest
 
 from easyconfig.config_objs import AppConfig, ConfigObj
+from easyconfig.config_objs.app_config import AppConfigBase, AsyncAppConfig
 from easyconfig.models import AppConfigMixin, ConfigMixin
 
 
@@ -10,7 +11,11 @@ from easyconfig.models import AppConfigMixin, ConfigMixin
     ('mixin_cls', 'impl_cls'),
     [
         (AppConfigMixin, AppConfig),
+        (AppConfigMixin, AsyncAppConfig),
         (AppConfig, AppConfigMixin),
+        (AsyncAppConfig, AppConfigMixin),
+        (AppConfig, AsyncAppConfig),
+
         (ConfigMixin, ConfigObj),
         (ConfigObj, ConfigMixin),
     ],
@@ -19,7 +24,7 @@ def test_signatures_match(mixin_cls, impl_cls) -> None:
     """Ensure that the mixin and the implementation have the same signatures"""
 
     for name, value in inspect.getmembers(mixin_cls):
-        if name.startswith('_') or name in ('from_model',):
+        if name.startswith('_') or name == 'from_model':
             continue
         impl = getattr(impl_cls, name)
 
@@ -38,3 +43,11 @@ def test_signatures_match(mixin_cls, impl_cls) -> None:
         assert current_spec == target_spec
 
         assert inspect.getdoc(value) == inspect.getdoc(impl)
+
+
+@pytest.mark.parametrize('cls', (AppConfig, AsyncAppConfig))
+def test_init_matches(cls) -> None:
+    target_spec = inspect.getfullargspec(AppConfigBase)
+    current_spec = inspect.getfullargspec(cls)
+
+    assert current_spec == target_spec

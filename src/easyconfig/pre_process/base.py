@@ -119,5 +119,5 @@ class PreProcessBase:
     def run(self, obj: ContainingObj, log_func: Callable[[str], Any] | None = None) -> None:
         raise NotImplementedError()
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: object) -> bool:
         raise NotImplementedError()

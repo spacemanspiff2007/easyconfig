@@ -36,7 +36,7 @@ values and comments of the pydantic models.
 That way the users can have some guidance how to change the program behaviour.
 
 
-### Expansion
+### Environment Variable Expansion
 It's possible to use environment variable or files for expansion. Easyconfig will load all values
 
 

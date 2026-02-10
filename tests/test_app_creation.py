@@ -1,87 +1,97 @@
 # ruff: noqa: RUF012
-
+from collections.abc import Awaitable
 from enum import Enum
 
 import pytest
 from pydantic import BaseModel, Field, ValidationError
 
-from easyconfig import create_app_config
+from easyconfig import create_app_config, create_async_app_config
 from easyconfig.config_objs import AppConfig, ConfigObj
+from easyconfig.config_objs.app_config import AsyncAppConfig
 from easyconfig.errors import ExtraKwArgsNotAllowedError, FileDefaultsNotSetError
 from easyconfig.models import AppBaseModel as EasyAppBaseModel
 from easyconfig.models import BaseModel as EasyBaseModel
 
 
-def test_simple() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_simple(factory) -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
-    create_app_config(SimpleModel(aaa=99))
-    create_app_config(SimpleModel(), {'aaa': 999})
+    factory(SimpleModel(aaa=99))
+    factory(SimpleModel(), {'aaa': 999})
 
     with pytest.raises(ValidationError):
         create_app_config(SimpleModel(), {'aaa': 'asdf'})
 
 
-def test_process() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+async def test_process(factory) -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
     msgs = []
 
-    a = create_app_config(SimpleModel(aaa=99))
+    a = factory(SimpleModel(aaa=99))
     a.load_preprocess.rename_entry(['zzz'], 'aaa').set_log_func(msgs.append)
-    a.load_config_dict({'zzz': 999})
+
+    obj = a.load_config_dict({'zzz': 999})
+    if isinstance(obj, Awaitable):
+        await obj
 
     assert a.a == 999
     assert msgs == ['Entry "zzz" renamed to "aaa"']
 
 
-def test_default_yaml() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_default_yaml(factory) -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
-    a = create_app_config(SimpleModel(aaa=99))
+    a = factory(SimpleModel(aaa=99))
     assert a.generate_default_yaml() == 'aaa: 99\n'
 
-    a = create_app_config(SimpleModel(), file_values=SimpleModel(aaa=12))
+    a = factory(SimpleModel(), file_values=SimpleModel(aaa=12))
     assert a.generate_default_yaml() == 'aaa: 12\n'
 
-    a = create_app_config(SimpleModel(), file_values=None)
+    a = factory(SimpleModel(), file_values=None)
     with pytest.raises(FileDefaultsNotSetError):
         a.generate_default_yaml()
 
 
-def test_callback_for_default() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_callback_for_default(factory) -> None:
     class SimpleModel(BaseModel):
         a: int = Field(5, alias='aaa')
 
     def get_default():
         return SimpleModel(aaa=999)
 
-    a = create_app_config(SimpleModel(), get_default)
+    a = factory(SimpleModel(), get_default)
     assert a._file_defaults.a == 999
 
-    a = create_app_config(SimpleModel(), lambda: {'aaa': 999})
+    a = factory(SimpleModel(), lambda: {'aaa': 999})
     assert a._file_defaults.a == 999
 
 
-def test_extra_kwargs() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_extra_kwargs(factory) -> None:
     class SimpleModelOk(BaseModel):
         a: int = Field(5, alias='aaa', in_file=False)
 
-    create_app_config(SimpleModelOk(aaa=99))
+    factory(SimpleModelOk(aaa=99))
 
     class SimpleModelErr(BaseModel):
         a: int = Field(5, alias='aaa', in__file=False)
 
     with pytest.raises(ExtraKwArgsNotAllowedError) as e:
-        create_app_config(SimpleModelErr(aaa=99))
+        factory(SimpleModelErr(aaa=99))
 
     assert str(e.value) == 'Extra kwargs for field "a" of SimpleModelErr are not allowed: in__file'
 
 
-def test_list_of_models() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_list_of_models(factory) -> None:
     class MyEnum(str, Enum):
         A = 'aa'
 
@@ -93,7 +103,7 @@ def test_list_of_models() -> None:
     class EncapModel(EasyBaseModel):
         c: list[SimpleModel] = []
 
-    create_app_config(
+    factory(
         EncapModel(
             c=[
                 SimpleModel(),
@@ -103,19 +113,20 @@ def test_list_of_models() -> None:
     )
 
 
-def test_path() -> None:
+@pytest.mark.parametrize('factory', (create_app_config, create_async_app_config))
+def test_path(factory) -> None:
     class SimpleModel(EasyBaseModel):
         z: str = 'asdf'
 
     class ParentModel(EasyAppBaseModel):
         b: SimpleModel = SimpleModel()
 
-    a = create_app_config(ParentModel())
+    a = factory(ParentModel())
 
-    assert isinstance(a, AppConfig)
+    assert isinstance(a, AppConfig if factory is create_app_config else AsyncAppConfig)
     assert isinstance(a.b, ConfigObj)
 
     a._file_path = o = object()
 
-    assert a.loaded_file_path is o
-    assert a.b.loaded_file_path is o
+    assert a.config_file_path is o
+    assert a.b.config_file_path is o
