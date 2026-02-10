@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+from asyncio import Lock
 from io import StringIO
 from pathlib import Path
 from typing import TYPE_CHECKING, Any, Final
 
-from typing_extensions import override
-
 from easyconfig.__const__ import MISSING, MISSING_TYPE
-from easyconfig.config_objs import ConfigNodeSubscriptionManager
 from easyconfig.config_objs.object_config import ConfigObj
 from easyconfig.errors import FileDefaultsNotSetError
 from easyconfig.expansion import expand_obj
@@ -18,6 +16,8 @@ from easyconfig.yaml import CommentedMap, cmap_from_model, write_aligned_yaml, y
 if TYPE_CHECKING:
     from pydantic import BaseModel
     from typing_extensions import Self
+
+    from easyconfig.config_objs import ConfigNodeSubscriptionManager
 
 
 class AppConfigBase(ConfigObj):
@@ -107,18 +107,12 @@ class AppConfigBase(ConfigObj):
         write_aligned_yaml(c_map, buffer, extra_indent=1)
         return buffer.getvalue()
 
-    def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
-        raise NotImplementedError()
-
-    def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
-        raise NotImplementedError()
-
     def __repr__(self) -> str:
         return f'<{self.__class__.__name__} {self._file_path} at {id(self)}>'
 
 
 class AppConfig(AppConfigBase):
-    @override
+
     def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
@@ -130,7 +124,6 @@ class AppConfig(AppConfigBase):
             sub.call()
         return self
 
-    @override
     def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 
@@ -146,19 +139,23 @@ class AppConfig(AppConfigBase):
 
 
 class AsyncAppConfig(AppConfigBase):
-    @override
+    def __init__(self, model: BaseModel, path: tuple[str, ...] = ('__root__',),
+                 parent: MISSING_TYPE | Self = MISSING, file_defaults: BaseModel | None = None, **kwargs: Any) -> None:
+        super().__init__(model=model, path=path, parent=parent, file_defaults=file_defaults, **kwargs)
+        self._lock: Final = Lock()
+
     async def load_config_dict(self, cfg: dict, *, expansion: bool = True) -> Self:
         """Load the configuration from a dictionary
 
         :param cfg: config dict which will be loaded
         :param expansion: Expand ${...} in strings
         """
-        subscriptions = self._update_from_dict(cfg, expansion=expansion)
-        for sub in subscriptions:
-            await sub.call_async()
+        async with self._lock:
+            subscriptions = self._update_from_dict(cfg, expansion=expansion)
+            for sub in subscriptions:
+                await sub.call_async()
         return self
 
-    @override
     async def load_config_file(self, path: Path | str | None = None, *, expansion: bool = True) -> Self:
         """Load configuration from a yaml file. If the file does not exist a default file will be created
 

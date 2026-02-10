@@ -229,6 +229,44 @@ This is especially useful feature if the application allows dynamic reloading of
     # ------------ skip: stop -------------
 
 
+Async Callbacks
+--------------------------------------
+If you have an asyncio application you can also register coroutines as callbacks.
+To make it work you have to use `create_async_app_config` instead of `create_app_config` to create the config object.
+
+
+.. exec_code::
+    :language_output: yaml
+    :caption_output: Generated yaml file
+
+    from easyconfig import AppBaseModel, create_async_app_config
+
+    class MySimpleAppConfig(AppBaseModel):
+        retries: int = 5
+        url: str = 'localhost'
+        port: int = 443
+
+    # An async function that does the setup
+    async def setup_http():
+        # some internal function
+        create_my_http_client(CONFIG.url, CONFIG.port)
+
+    CONFIG = create_async_app_config(MySimpleAppConfig())
+
+    # setup_http will be automatically called if a value changes in the MyAppSimpleConfig
+    # during a subsequent call to CONFIG.load_file() or
+    # when the config gets loaded for the first time
+    sub = CONFIG.subscribe_for_changes(setup_http)
+
+    # It's possible to cancel the subscription again
+    sub.cancel()
+
+    # ------------ skip: start ------------
+    async def __main__():
+        # This will trigger the callback
+        await CONFIG.load_config_file('/my/configuration/file.yml')
+    # ------------ skip: stop -------------
+
 
 Preprocessing
 --------------------------------------

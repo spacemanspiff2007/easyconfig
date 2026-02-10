@@ -22,10 +22,10 @@ class ExpansionLocation:
         if name in self.stack:
             msg = f'Cyclic environment variable reference: {" -> ".join(new_stack):s} {self.location_str()}'
             raise CyclicEnvironmentVariableReferenceError(msg)
-        return ExpansionLocation(loc=self.loc, stack=new_stack)
+        return self.__class__(loc=self.loc, stack=new_stack)
 
     def process_obj(self, name: str) -> Self:
-        return ExpansionLocation(
+        return self.__class__(
             loc=(
                 *self.loc,
                 name,

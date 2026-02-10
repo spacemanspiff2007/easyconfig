@@ -150,9 +150,12 @@ class ConfigObj:
     def config_file_path(self) -> Path:
         """Path to the loaded configuration file"""
 
-        obj = self
+        obj: ConfigObj | MISSING_TYPE = self
         while obj._obj_path != ('__root__',):
             obj = obj._obj_parent
+            if obj is MISSING:
+                msg = f'Parent object of {self._full_obj_path} is missing!'
+                raise ValueError(msg)
         return obj.config_file_path
 
     def subscribe_set_options(self, *, propagate: bool | None = None, on_next_value: bool | None = None) -> Self:
