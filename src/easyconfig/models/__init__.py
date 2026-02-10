@@ -3,7 +3,7 @@ from .field import Field
 
 # isort: split
 
-from .app import AppConfigMixin
+from .app import AppConfigMixin, AsyncAppConfigMixin
 from .config import ConfigMixin
 
 
