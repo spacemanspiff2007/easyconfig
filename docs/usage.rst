@@ -232,7 +232,8 @@ This is especially useful feature if the application allows dynamic reloading of
 Async Callbacks
 --------------------------------------
 If you have an asyncio application you can also register coroutines as callbacks.
-To make it work you have to use `create_async_app_config` instead of `create_app_config` to create the config object.
+To make it work you have to use ``create_async_app_config`` instead of ``create_app_config``
+to create the config object.
 
 
 .. exec_code::
