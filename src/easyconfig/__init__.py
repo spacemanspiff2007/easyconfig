@@ -4,7 +4,16 @@ from easyconfig.__version__ import __version__
 
 # isort: split
 
-from easyconfig.models import AppBaseModel, AppBaseSettings, AppConfigMixin, BaseModel, BaseSettings, ConfigMixin, Field
+from easyconfig.models import (
+    AppBaseModel,
+    AppBaseSettings,
+    AppConfigMixin,
+    AsyncAppConfigMixin,
+    BaseModel,
+    BaseSettings,
+    ConfigMixin,
+    Field,
+)
 
 
 # isort: split
