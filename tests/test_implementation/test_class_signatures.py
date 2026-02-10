@@ -46,7 +46,7 @@ def test_signatures_match(mixin_cls, impl_cls) -> None:
 
 
 @pytest.mark.parametrize('cls', (AppConfig, AsyncAppConfig))
-def test_init_matches(cls):
+def test_init_matches(cls) -> None:
     target_spec = inspect.getfullargspec(AppConfigBase)
     current_spec = inspect.getfullargspec(cls)
 
