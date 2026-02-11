@@ -1,3 +1,6 @@
+import pytest
+
+from easyconfig import BaseModel
 from easyconfig.pre_process import RenameEntryPreProcess
 
 
@@ -37,3 +40,23 @@ def test_no_overwrite() -> None:
     a = {'a': 1, 'b': 2}
     RenameEntryPreProcess(('a',), 'b').run(a)
     assert a == {'a': 1, 'b': 2}
+
+
+def test_check():
+    class Default(BaseModel):
+        a: int
+
+    default = Default(a=1)
+    RenameEntryPreProcess(('b',), 'a').check(default)
+    with pytest.raises(ValueError) as e:
+        RenameEntryPreProcess(('b',), 'c').check(default)
+    assert str(e.value) == 'Path "c" does not exist in default'
+
+    class Parent(BaseModel):
+        a: Default
+
+    default = Parent(a=Default(a=1))
+    RenameEntryPreProcess(('a', 'b',), 'a').check(default)
+    with pytest.raises(ValueError) as e:
+        RenameEntryPreProcess(('a', 'b',), 'c').check(default)
+    assert str(e.value) == 'Path "a.c" does not exist in default'

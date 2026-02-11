@@ -1,4 +1,5 @@
-import ruamel.yaml  # type: ignore
+import ruamel.yaml
+import ruamel.yaml.comments
 
 
 yaml_rt = ruamel.yaml.YAML(typ='rt')

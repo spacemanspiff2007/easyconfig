@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
+from pydantic import BaseModel
 from typing_extensions import override
 
 from easyconfig.pre_process.base import ContainingObj, PathAccessor, PreProcessBase
@@ -34,4 +35,8 @@ class DeleteEntryPreProcess(PreProcessBase):
         if log_func is not None:
             log_func(f'Entry "{self.dst.path_name:s}" was deleted')
 
+        return None
+
+    @override
+    def check(self, default: BaseModel | None) -> None:
         return None
