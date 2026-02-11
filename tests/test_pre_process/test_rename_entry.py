@@ -42,7 +42,7 @@ def test_no_overwrite() -> None:
     assert a == {'a': 1, 'b': 2}
 
 
-def test_check():
+def test_check() -> None:
     class Default(BaseModel):
         a: int
 

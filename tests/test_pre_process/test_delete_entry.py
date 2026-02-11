@@ -52,7 +52,7 @@ def test_delete_nested() -> None:
     assert d == {'a': {'c': 1}}
 
 
-def test_check():
+def test_check() -> None:
     class BaseModel:
         pass
 
