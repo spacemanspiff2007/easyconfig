@@ -50,3 +50,11 @@ def test_delete_nested() -> None:
     d = {'a': {'c': 1}}
     f.run(d)
     assert d == {'a': {'c': 1}}
+
+
+def test_check() -> None:
+    class BaseModel:
+        pass
+
+    f = DeleteEntryPreProcess(('a', 'b'))
+    f.check(BaseModel())

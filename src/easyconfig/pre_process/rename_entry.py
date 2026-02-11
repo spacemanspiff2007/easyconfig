@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any, Final
 
+from pydantic import BaseModel
 from typing_extensions import override
 
 from .base import ContainingObj, PathAccessor, PreProcessBase
@@ -42,3 +43,8 @@ class RenameEntryPreProcess(PreProcessBase):
             log_func(f'Entry "{self.src.key_name:s}" renamed to "{self.dst.key_name:s}"{loc:s}')
 
         return None
+
+    @override
+    def check(self, default: BaseModel | None) -> None:
+        if default is not None:
+            self.dst.ensure_valid_path(default)

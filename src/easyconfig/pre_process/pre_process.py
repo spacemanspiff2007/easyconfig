@@ -36,6 +36,7 @@ class PreProcess(PreProcessBase):
         self._log: Callable[[str], Any] | None = None
 
     def _add(self, obj: PreProcessBase) -> None:
+        obj.check(self._default)
         for existing in self._operations:
             if existing == obj:
                 msg = f'Operation {obj} already exists'

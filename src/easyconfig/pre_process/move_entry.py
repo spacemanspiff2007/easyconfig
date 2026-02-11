@@ -4,8 +4,6 @@ from typing import TYPE_CHECKING, Any, Final
 
 from typing_extensions import override
 
-from easyconfig.yaml import cmap_from_model
-
 from .base import PathAccessor, PreProcessBase
 
 
@@ -21,13 +19,6 @@ class MoveEntryPreProcess(PreProcessBase):
         self.src: Final = PathAccessor(src)
         self.dst: Final = PathAccessor(dst)
         self.default: Final = defaults
-
-        # Validate the dst if we have a default so we catch e.g. typos
-        if self.default is not None:
-            yaml_defaults = cmap_from_model(self.default)
-            if self.dst.get_containing_obj(yaml_defaults) is None:
-                msg = f'Path "{self.dst.containing_name}" does not exist in default'
-                raise ValueError(msg)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, MoveEntryPreProcess):
@@ -55,3 +46,7 @@ class MoveEntryPreProcess(PreProcessBase):
         if log_func is not None:
             log_func(f'Entry "{self.src.path_name:s}" moved to "{self.dst.path_name:s}"')
         return None
+
+    @override
+    def check(self, default: BaseModel | None) -> None:
+        self.dst.ensure_valid_path(default)

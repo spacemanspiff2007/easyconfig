@@ -54,6 +54,49 @@ class PathAccessor:
 
         return obj
 
+    def ensure_valid_path(self, root: BaseModel) -> None:
+        obj = root
+
+        current_path = ()
+
+        for path in self.path:
+            current_path = current_path + (str(path), )
+
+            if isinstance(obj, tuple):
+                try:
+                    obj = obj[path]
+                except IndexError:
+                    obj = None
+            else:
+                # we access the raw data through the aliases
+                aliases = {
+                    field.alias: name for name, field in obj.__class__.model_fields.items() if field.alias is not None
+                }
+                accessor = aliases.get(path, path)
+                obj = getattr(obj, accessor, None)
+
+            if obj is None:
+                msg = f'Path "{".".join(current_path)}" does not exist in default'
+                raise ValueError(msg)
+
+    @staticmethod
+    def _create_default(parent: ContainingObj, name: str | int, default: ContainingObj, path: tuple[str, ...]) -> None:
+        if isinstance(parent, list):
+            if not isinstance(name, int):
+                msg = f'Expected int for list index, got {type(name)} at {".".join(path):s}'
+                raise TypeError(msg)
+            # we need to create a list with enough entries to access the current part
+            while len(parent) <= name:
+                parent.append({})
+
+        if isinstance(default, list):
+            parent[name] = []
+        elif isinstance(default, dict):
+            parent[name] = {}
+        else:
+            msg = f'Unsupported type {type(default)} at {".".join(path):s}'
+            raise TypeError(msg) from None
+
     def get_containing_obj_or_create_default(self, root: ContainingObj,
                                              default: BaseModel | None = None) -> ContainingObj | None:
         if (dst_obj := self.get_containing_obj(root)) is not None:
@@ -81,13 +124,7 @@ class PathAccessor:
                 if default_yaml is None:
                     return None
 
-                if isinstance(default_yaml, list):
-                    obj[part] = []
-                elif isinstance(default_yaml, dict):
-                    obj[part] = {}
-                else:
-                    msg = f'Unsupported type {type(default_yaml)} at {".".join(current_path):s}'
-                    raise TypeError(msg) from None
+                self._create_default(obj, part, default_yaml, current_path)
                 obj = obj[part]
 
         return obj
@@ -120,4 +157,7 @@ class PreProcessBase:
         raise NotImplementedError()
 
     def __eq__(self, other: object) -> bool:
+        raise NotImplementedError()
+
+    def check(self, default: BaseModel | None) -> None:
         raise NotImplementedError()
