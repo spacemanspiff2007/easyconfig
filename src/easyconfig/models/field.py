@@ -1,4 +1,5 @@
 import re
+from types import EllipsisType
 from typing import Literal, overload
 
 from pydantic import Field as PydanticField
@@ -15,19 +16,15 @@ from pydantic.fields import (
     JsonDict,
     Unpack,
     _EmptyKwargs,
-    _typing_extra,
     _Unset,
     annotated_types,
     types,
 )
 
 
-ellipsis = _typing_extra.EllipsisType
-
-
 @overload  # type hint the return value as `Any` to avoid type checking regressions when using `...`.
 def Field(
-    default: ellipsis,  # noqa: F821  # TODO: use `_typing_extra.EllipsisType` when we drop Py3.9
+    default: EllipsisType,
     *,
     alias: str | None = _Unset,
     alias_priority: int | None = _Unset,
@@ -66,6 +63,8 @@ def Field(
     in_file: bool = True,
     **extra: Unpack[_EmptyKwargs],
 ) -> Any: ...
+
+
 @overload  # `default` argument set, validate_default=True (no type checking on the default value)
 def Field(
     default: Any,

@@ -41,6 +41,9 @@ It's possible to use environment variable or files for expansion. Easyconfig wil
 
 
 # Changelog
+#### 0.4.6 (2026-10-23)
+- Fixed an issue with pydantic imports
+
 #### 0.4.5 (2026-02-11)
 - Fixed an issue with migrations
 
